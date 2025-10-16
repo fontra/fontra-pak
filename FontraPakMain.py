@@ -475,7 +475,7 @@ def showMessageDialog(
 
 
 @dataclass
-class ExportManager:
+class FontraPakExportManager:
     appQueue: multiprocessing.Queue
 
     def getSupportedExportFormats(self):
@@ -492,7 +492,9 @@ def runFontraServer(host, port, queue):
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    projectManager = FileSystemProjectManager(None, exportManager=ExportManager(queue))
+    projectManager = FileSystemProjectManager(
+        None, exportManager=FontraPakExportManager(queue)
+    )
 
     server = FontraServer(
         host=host,

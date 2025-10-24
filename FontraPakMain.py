@@ -17,7 +17,8 @@ import psutil
 from fontra import __version__ as fontraVersion
 from fontra.backends import getFileSystemBackend, newFileSystemBackend
 from fontra.backends.copy import copyFont
-from fontra.core.classes import DiscreteFontAxis, FontSource, LineMetric
+from fontra.backends.populate import populateBackend
+from fontra.core.classes import DiscreteFontAxis
 from fontra.core.server import FontraServer, findFreeTCPPort
 from fontra.filesystem.projectmanager import FileSystemProjectManager
 from PyQt6.QtCore import (
@@ -404,47 +405,10 @@ async def exportFontToPathAsync(sourcePath, destPath, fileExtension):
             await copyFont(sourceBackend, destBackend)
 
 
-defaultLineMetrics = {
-    "ascender": (750, 16),
-    "descender": (-250, -16),
-    "xHeight": (500, 16),
-    "capHeight": (750, 16),
-    "baseline": (0, -16),
-}
-
-
-PROJECT_GLYPH_SETS_CUSTOM_DATA_KEY = "fontra.projectGlyphSets"
-
-
 async def createNewFont(fontPath):
     # Create a new empty project on disk
-    import secrets
-
-    defaultSource = FontSource(
-        name="Regular",
-        lineMetricsHorizontalLayout={
-            name: LineMetric(value=value, zone=zone)
-            for name, (value, zone) in defaultLineMetrics.items()
-        },
-    )
-
-    customData = {
-        PROJECT_GLYPH_SETS_CUSTOM_DATA_KEY: [
-            {
-                "name": "GF Latin Kernel",
-                "url": (
-                    "https://raw.githubusercontent.com/googlefonts/glyphsets/"
-                    + "main/data/results/txt/nice-names/GF_Latin_Kernel.txt"
-                ),
-                "dataFormat": "glyph-names",
-                "commentChars": "#",
-            },
-        ]
-    }
-
     destBackend = newFileSystemBackend(fontPath)
-    await destBackend.putSources({secrets.token_hex(4): defaultSource})
-    await destBackend.putCustomData(customData)
+    await populateBackend(destBackend)
     await destBackend.aclose()
 
 

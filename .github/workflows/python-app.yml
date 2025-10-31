@@ -155,6 +155,9 @@ jobs:
 
     steps:
 
+      - name: Git checkout
+        uses: actions/checkout@v5
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

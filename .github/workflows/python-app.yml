@@ -3,12 +3,11 @@ name: Build Application
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: "21 1 * * 1-5"
+    - cron: "21 1 * * 1"
   workflow_dispatch: # allow manual trigger
-  # push:
-  #   branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    tags:
+      - "*.*.*"
 
 jobs:
   build-macos-app:
@@ -149,12 +148,17 @@ jobs:
           name: FontraPakWindows
           path: ./dist/*.exe
 
-  upload-to-download-server:
+  create-github-release:
     runs-on: ubuntu-latest
     needs: [build-macos-app, build-windows-exe]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref_type == 'tag'
 
     steps:
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
       - name: Retrieve Artifact
         uses: actions/download-artifact@v5
@@ -170,14 +174,18 @@ jobs:
         run: ls -R
         working-directory: ./downloaded-artifact
 
-      - name: Upload Artifact
-        uses: appleboy/scp-action@v1.0.0
+
+      - name: Extract Latest Changes
+        run: |
+          python scripts/extract_latest_changes.py > tmp_latest_changes.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          host: ${{ secrets.FONTRA_DOWNLOAD_HOST }}
-          username: ${{ secrets.FONTRA_DOWNLOAD_USERNAME }}
-          password: ${{ secrets.FONTRA_DOWNLOAD_PASSWORD }}
-          source: "./downloaded-artifact/FontraPakMacOS/FontraPak.dmg,./downloaded-artifact/FontraPakWindows/FontraPak.zip"
-          target: "/home/fontra/public-html/"
-          strip_components: 3
-          debug: true
-          overwrite: true
+          body_path: 'tmp_latest_changes.txt'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # prerelease: true
+          draft: true
+          files: |
+            ./downloaded-artifact/FontraPakWindows/*.zip
+            ./downloaded-artifact/FontraPakMacOS/*.dmg

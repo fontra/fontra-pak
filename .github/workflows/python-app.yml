@@ -106,7 +106,7 @@ jobs:
           xcrun stapler staple "$DMG_PATH"
 
       - name: Storing macOS Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: FontraPakMacOS
           path: ./dist/*.dmg
@@ -144,7 +144,7 @@ jobs:
           pytest
 
       - name: Storing Windows Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: FontraPakWindows
           path: ./dist/*.exe

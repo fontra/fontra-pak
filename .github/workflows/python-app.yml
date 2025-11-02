@@ -200,8 +200,7 @@ jobs:
         with:
           body_path: 'tmp_latest_changes.txt'
           token: ${{ secrets.GITHUB_TOKEN }}
-          # prerelease: true
-          draft: true
+          draft: true  # remove once stable
           files: |
             ./downloaded-artifact/FontraPakWindows/*.zip
             ./downloaded-artifact/FontraPakMacOS/*.dmg

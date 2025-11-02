@@ -6,7 +6,7 @@ from release_helpers import downloadResource
 
 def parseTag(tag):
     try:
-        yyyy, mm, patch = [int(item) for item in tag.split()]
+        yyyy, mm, patch = [int(item) for item in tag.split(".")]
     except ValueError:
         return (0, 0, 0)
     return (yyyy, mm, patch)
@@ -22,6 +22,7 @@ def getLatestTag():
 
 
 latestTag = getLatestTag()
+print(f"Using tag: {latestTag}")
 
 subprocess.run(
     ["git", "tag", "-a", latestTag, "-m", f"Version {latestTag}"],

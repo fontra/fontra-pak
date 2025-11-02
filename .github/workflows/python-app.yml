@@ -57,7 +57,7 @@ jobs:
         if: github.ref_type == 'tag'
         run: |
           source venv/bin/activate
-          python scripts/patch_requirements.py $GITHUB_REF_NAME
+          python scripts/patch_requirements.py ${{ github.ref_name }}
 
       - name: Install dependencies
         run: |
@@ -137,7 +137,7 @@ jobs:
       - name: Patch requirements.txt
         if: github.ref_type == 'tag'
         run: |
-          python scripts/patch_requirements.py $GITHUB_REF_NAME
+          python scripts/patch_requirements.py ${{ github.ref_name }}
 
       - name: Install dependencies
         run: |

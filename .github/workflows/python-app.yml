@@ -86,7 +86,7 @@ jobs:
       - name: macOS Notarize -- Codesign and Notarize
         run: |
           APP_PATH="dist/Fontra Pak.app"
-          DMG_PATH="dist/FontraPak.dmg"
+          DMG_PATH="dist/FontraPak-macOS.dmg"
 
           source venv/bin/activate
           macos/codesign_app.sh "${{ secrets.CODESIGN_NAME }}" "$APP_PATH" macos/entitlements.plist
@@ -184,7 +184,7 @@ jobs:
       - name: Zip Windows Artifact
         run: |
           cd ./downloaded-artifact/FontraPakWindows
-          zip -q FontraPak.zip "Fontra Pak.exe"
+          zip -q FontraPak-Windows.zip "Fontra Pak.exe"
 
       - name: Display structure of downloaded files
         run: ls -R

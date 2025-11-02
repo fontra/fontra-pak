@@ -1,4 +1,4 @@
-git+https://github.com/fontra/fontra.git@2025.10.1
+git+https://github.com/fontra/fontra.git
 git+https://github.com/fontra/fontra-compile.git
 git+https://github.com/fontra/fontra-rcjk.git
 git+https://github.com/fontra/fontra-glyphs.git

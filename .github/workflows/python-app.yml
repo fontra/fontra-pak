@@ -204,3 +204,10 @@ jobs:
           files: |
             ./downloaded-artifact/FontraPakWindows/*.zip
             ./downloaded-artifact/FontraPakMacOS/*.dmg
+
+      - name: Update website / Repository Dispatch
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.WEBSITE_PAT }}
+          repository: fontra/fontra-website
+          event-type: release-event

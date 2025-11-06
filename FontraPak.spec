@@ -173,5 +173,5 @@ else:
         codesign_identity=None,
         entitlements_file=None,
         icon="icon/FontraIcon.ico",
-        version=buildWindowsVersionResource(),
+        version=buildWindowsVersionResource() if sys.platform == "win32" else None,
     )

@@ -4,6 +4,57 @@ from importlib.metadata import PackageNotFoundError
 from PyInstaller.utils.hooks import collect_all, copy_metadata
 from fontra import __version__ as fontraVersion
 
+
+def buildWindowsVersionResource():
+    from PyInstaller.utils.win32.versioninfo import (
+        VSVersionInfo,
+        FixedFileInfo,
+        StringFileInfo,
+        StringTable,
+        StringStruct,
+        VarFileInfo,
+        VarStruct,
+    )
+
+    y, m, patch, *extra = fontraVersion.split(".", maxsplit=3)
+    y, m, patch = [int(v) for v in (y, m, patch)]
+
+    return VSVersionInfo(
+        ffi=FixedFileInfo(
+            filevers=(y, m, patch, 0),
+            prodvers=(y, m, patch, 0),
+            mask=0x3F,
+            flags=0x0,
+            OS=0x4,
+            fileType=0x1,
+            subtype=0x0,
+            date=(0, 0),
+        ),
+        kids=[
+            StringFileInfo(
+                [
+                    StringTable(
+                        "040904B0",
+                        [
+                            StringStruct("CompanyName", "Fontra.xyz"),
+                            StringStruct("FileDescription", "Fontra Pak"),
+                            StringStruct("FileVersion", fontraVersion),
+                            StringStruct("InternalName", "Fontra Pak"),
+                            StringStruct(
+                                "LegalCopyright", "© Google LLC, Just van Rossum"
+                            ),
+                            StringStruct("OriginalFilename", "Fontra Pak.exe"),
+                            StringStruct("ProductName", "Fontra Pak"),
+                            StringStruct("ProductVersion", fontraVersion),
+                        ],
+                    )
+                ]
+            ),
+            VarFileInfo([VarStruct("Translation", [1033, 1200])]),
+        ],
+    )
+
+
 datas = []
 binaries = []
 hiddenimports = []
@@ -122,4 +173,5 @@ else:
         codesign_identity=None,
         entitlements_file=None,
         icon="icon/FontraIcon.ico",
+        version=buildWindowsVersionResource(),
     )

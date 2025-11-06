@@ -2,6 +2,7 @@
 import sys
 from importlib.metadata import PackageNotFoundError
 from PyInstaller.utils.hooks import collect_all, copy_metadata
+from fontra import __version__ as fontraVersion
 
 datas = []
 binaries = []
@@ -81,6 +82,7 @@ if sys.platform == "darwin":
         name="Fontra Pak.app",
         icon="icon/FontraIcon.icns",
         bundle_identifier="xyz.fontra.fontra-pak",
+        version=fontraVersion,
         info_plist={
             "CFBundleDocumentTypes": [
                 dict(

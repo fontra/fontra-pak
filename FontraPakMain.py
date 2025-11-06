@@ -169,10 +169,8 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 4, 0)
 
-        if sys.platform == "darwin":
-            downloadLink = "https://fontra-download.black-foundry.com/FontraPak.dmg"
-        elif sys.platform == "win32":
-            downloadLink = "https://fontra-download.black-foundry.com/FontraPak.zip"
+        if sys.platform in {"darwin", "win32"}:
+            downloadLink = "https://github.com/fontra/fontra-pak/releases/latest"
         else:
             # We don't provide downloads for other platforms.
             downloadLink = None

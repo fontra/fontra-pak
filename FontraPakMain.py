@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import multiprocessing
 import os
@@ -8,10 +9,14 @@ import signal
 import sys
 import tempfile
 import threading
+import traceback
 import webbrowser
 from contextlib import aclosing
 from dataclasses import dataclass
+from datetime import datetime
+from random import random
 from urllib.parse import quote
+from urllib.request import urlopen
 
 import psutil
 from fontra import __version__ as fontraVersion
@@ -104,6 +109,8 @@ exportFileTypesMapping = {
 
 exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 
+latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
+
 
 class FontraApplication(QApplication):
     def __init__(self, argv, port):
@@ -170,20 +177,15 @@ class FontraMainWidget(QMainWindow):
         layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 4, 0)
 
         if sys.platform in {"darwin", "win32"}:
-            downloadLink = "https://github.com/fontra/fontra-pak/releases/latest"
-        else:
-            # We don't provide downloads for other platforms.
-            downloadLink = None
-
-        if downloadLink is not None:
-            buttonDownload = QPushButton("Download latest Fontra Pak", self)
-            buttonDownload.setSizePolicy(
+            self.downloadButton = QPushButton("Download latest Fontra Pak", self)
+            self.downloadButton.setSizePolicy(
                 QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
             )
-            buttonDownload.clicked.connect(lambda: webbrowser.open(downloadLink))
+            self.downloadButton.clicked.connect(self.goToLatestDownload)
             layout.addWidget(
-                buttonDownload, 4, 1, alignment=Qt.AlignmentFlag.AlignRight
+                self.downloadButton, 4, 1, alignment=Qt.AlignmentFlag.AlignRight
             )
+            self.checkForUpdate(1500)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -342,6 +344,70 @@ class FontraMainWidget(QMainWindow):
             callInMainThread(exportFinished)
 
         callInNewThread(exportProcessJoin)
+
+    def checkForUpdate(self, msDelay):
+        QTimer.singleShot(msDelay, lambda: callInNewThread(self._checkForUpdate))
+
+    def _checkForUpdate(self):
+        if "dev" in fontraVersion:
+            return
+
+        print(f"Checking for update on {datetime.now()}")
+
+        latestVersion, downloadURL = fetchLatestReleaseInfo()
+
+        if downloadURL is not None and latestVersion != fontraVersion:
+            callInMainThread(
+                self.downloadButton.setText, "‼️ A new version is available ‼️"
+            )
+        else:
+            # Try again in a bit more than a day
+            hours = 24 + 4 * random()
+            minutes = hours * 60
+            seconds = minutes * 60
+            msDelay = seconds * 1000
+            callInMainThread(self.checkForUpdate, int(msDelay))
+
+    def goToLatestDownload(self):
+        _, downloadURL = fetchLatestReleaseInfo()
+
+        if downloadURL is None:
+            downloadURL = latestReleasePageURL
+
+        webbrowser.open(downloadURL)
+
+
+def fetchLatestReleaseInfo() -> tuple[str, str | None]:
+    try:
+        return _fetchLatestReleaseInfo()
+    except Exception:
+        print("Failed to fetch release info")
+        traceback.print_exc()
+
+    return "0.0.0", None
+
+
+def _fetchLatestReleaseInfo() -> tuple[str, str | None]:
+    url = "https://api.github.com/repos/fontra/fontra-pak/releases/latest"
+    response = urlopen(url)
+    latestRelease = json.loads(response.read().decode("utf-8"))
+    latestVersion = latestRelease["tag_name"]
+
+    assetNamePart = None
+    match sys.platform:
+        case "darwin":
+            assetNamePart = "macOS"
+        case "win32":
+            assetNamePart = "Windows"
+
+    if assetNamePart is None:
+        return latestVersion, None
+
+    [assetInfo] = [
+        asset for asset in latestRelease["assets"] if assetNamePart in asset["name"]
+    ]
+
+    return latestVersion, assetInfo["browser_download_url"]
 
 
 def exportFontToPath(sourcePath, destPath, fileExtension, logFilePath):

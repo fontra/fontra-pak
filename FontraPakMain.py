@@ -185,7 +185,8 @@ class FontraMainWidget(QMainWindow):
             layout.addWidget(
                 self.downloadButton, 4, 1, alignment=Qt.AlignmentFlag.AlignRight
             )
-            self.checkForUpdate(1500)
+            if "test-startup" not in sys.argv:
+                self.checkForUpdate(1500)
 
         widget = QWidget()
         widget.setLayout(layout)

@@ -3,7 +3,7 @@ git+https://github.com/fontra/fontra-compile.git
 git+https://github.com/fontra/fontra-rcjk.git
 git+https://github.com/fontra/fontra-glyphs.git
 aiohttp==3.13.2
-pyinstaller==6.16.0
+pyinstaller==6.17.0
 # pin setuptools for now to avoid new pkg_resources warning
 setuptools==80.8.0  # pinned!
 PyQt6==6.7.1
@@ -12,4 +12,4 @@ PyQt6-sip==13.10.2
 # Use patched fork to work around https://github.com/matthew-brett/delocate/issues/228
 git+https://github.com/justvanrossum/delocate.git
 # delocate==0.12.0
-psutil==7.1.2
+psutil==7.1.3

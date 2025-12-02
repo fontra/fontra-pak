@@ -20,7 +20,7 @@ with tempfile.TemporaryDirectory() as imgPath:
     try:
         os.symlink("/Applications", os.path.join(imgPath, "Applications"))
 
-        tmpImagePath = tempfile.mktemp(suffix=".dmg")
+        tmpImagePath = tempfile.mkstemp(suffix=".dmg")
         try:
             createCommand = [
                 "hdiutil",

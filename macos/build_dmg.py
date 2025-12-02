@@ -36,6 +36,7 @@ with tempfile.TemporaryDirectory() as imgPath:
                 "-format",
                 "UDZO",
                 "-quiet",
+                "-ov",  # allow overwrite
                 tmpImagePath,
             ]
             subprocess.run(createCommand, check=True)

@@ -165,13 +165,55 @@ jobs:
           name: FontraPakWindows
           path: ./dist/*.exe
 
+  build-linux-binary:
+    runs-on: ubuntu-22.04
+
+    permissions:
+      contents: read
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-dev.txt
+
+      - name: Build exe
+        run: |
+          pyinstaller FontraPak.spec -y
+          mv dist/Fontra\ Pak dist/fontrapak
+      - name: Run tests
+        run: |
+          pytest
+
+      - name: Storing Ubuntu Artifacts
+        id: upload_artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: fontrapak
+          path: ./dist/fontrapak
+
+  
   create-github-release:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
-    needs: [build-macos-app, build-windows-exe]
+    needs: [build-macos-app, build-windows-exe, build-linux-binary]
     if: github.ref_type == 'tag'
 
     steps:
@@ -194,6 +236,12 @@ jobs:
           cd ./downloaded-artifact/FontraPakWindows
           zip -q FontraPak-Windows.zip "Fontra Pak.exe"
 
+      - name: Tar-gzip Linux Binary
+        run: |
+          cd ./downloaded-artifact/fontrapak
+          tar -czvf fontrapak.tgz "fontrapak"
+
+
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: ./downloaded-artifact
@@ -211,6 +259,7 @@ jobs:
           files: |
             ./downloaded-artifact/FontraPakWindows/*.zip
             ./downloaded-artifact/FontraPakMacOS/*.dmg
+            ./dowloaded-artifact/fontrapak/*.tgz
 
       - name: Update website / Repository Dispatch
         uses: peter-evans/repository-dispatch@v4

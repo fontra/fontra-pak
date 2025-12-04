@@ -150,7 +150,11 @@ def main():
             assert len(universal_wheels) == 1
             download_file(universal_wheels[0], wheels_dir)
         elif platform_wheels:
-            assert len(platform_wheels) == 2
+            assert len(platform_wheels) == 2, (
+                package,
+                wheel_filename,
+                len(platform_wheels),
+            )
             merge_wheels(platform_wheels[0], platform_wheels[1], wheels_dir)
         else:
             raise IncompatibleWheelError(

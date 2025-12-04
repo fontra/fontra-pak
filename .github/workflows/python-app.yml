@@ -39,32 +39,18 @@ jobs:
           node-version: 20.x
           cache: "npm"
 
-      - name: Set up Python 3.12 for macOS
-        # We use Python from python.org instead of from actions/setup-python, as the app
-        # built with the latter does not work on macOS 10.15
-        run: |
-          curl https://www.python.org/ftp/python/3.12.7/python-3.12.7-macos11.pkg --output python-installer.pkg
-          sudo installer -pkg python-installer.pkg -target /
-          # Somehow using plain "python3" gives us the runner's homebrew Python,
-          # so let's be explicit about the path:
-          ourpython=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12
-          ls -l $ourpython
-          $ourpython --version
-          $ourpython -c "import platform; print('platform:', platform.platform())"
-          $ourpython -c "import platform; print('macOS version:', platform.mac_ver()[0])"
-          $ourpython -m venv venv
-          source venv/bin/activate
-          python -c "import sys; print('\n'.join(sys.path))"
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
 
       - name: Patch requirements.txt
         if: github.ref_type == 'tag'
         run: |
-          source venv/bin/activate
           python scripts/patch_requirements.py ${{ github.ref_name }}
 
       - name: Install dependencies
         run: |
-          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt | tee pip_log.txt
           python macos/ensure_universal_wheels.py pip_log.txt
@@ -73,17 +59,14 @@ jobs:
 
       - name: Run pre-commit
         run: |
-          source venv/bin/activate
           pre-commit run --all-files --verbose --show-diff-on-failure
 
       - name: Build app
         run: |
-          source venv/bin/activate
           pyinstaller FontraPak.spec -y
 
       - name: Run tests
         run: |
-          source venv/bin/activate
           pytest
 
       - name: macOS Notarize -- Codesign and Notarize
@@ -91,7 +74,6 @@ jobs:
           APP_PATH="dist/Fontra Pak.app"
           DMG_PATH="dist/FontraPak-macOS.dmg"
 
-          source venv/bin/activate
           macos/codesign_app.sh "${{ secrets.CODESIGN_NAME }}" "$APP_PATH" macos/entitlements.plist
           python macos/build_dmg.py "$APP_PATH" "$DMG_PATH"
 
@@ -135,10 +117,10 @@ jobs:
           node-version: 20.x
           cache: "npm"
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.13
         uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
+          python-version: "3.13"
 
       - name: Patch requirements.txt
         if: github.ref_type == 'tag'

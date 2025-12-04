@@ -122,7 +122,8 @@ def main():
                 for file_descriptor in data["urls"]
                 if file_descriptor["python_version"] == python_version
                 and any(
-                    "macos" in tag.platform and not tag.abi.endswith("t")
+                    "macos" in tag.platform
+                    and not tag.abi.endswith("t")  # skip free threaded wheels
                     for tag in parse_wheel_filename(file_descriptor["filename"])[3]
                 )
             ]
@@ -141,7 +142,9 @@ def main():
                 file_descriptor["filename"]
             )
             if any(
-                "macosx" in tag.platform and not tag.abi.endswith("t") for tag in tags
+                "macosx" in tag.platform
+                and not tag.abi.endswith("t")  # skip free threaded wheels
+                for tag in tags
             ):
                 if any("universal2" in tag.platform for tag in tags):
                     universal_wheels.append(file_descriptor["url"])

@@ -123,6 +123,7 @@ def main():
                 if file_descriptor["python_version"] == python_version
                 and any(
                     "macos" in tag.platform
+                    and not tag.abi.endswith("t")  # skip free threaded wheels
                     for tag in parse_wheel_filename(file_descriptor["filename"])[3]
                 )
             ]
@@ -140,7 +141,11 @@ def main():
             package, version, build, tags = parse_wheel_filename(
                 file_descriptor["filename"]
             )
-            if any("macosx" in tag.platform for tag in tags):
+            if any(
+                "macosx" in tag.platform
+                and not tag.abi.endswith("t")  # skip free threaded wheels
+                for tag in tags
+            ):
                 if any("universal2" in tag.platform for tag in tags):
                     universal_wheels.append(file_descriptor["url"])
                 else:
@@ -150,7 +155,11 @@ def main():
             assert len(universal_wheels) == 1
             download_file(universal_wheels[0], wheels_dir)
         elif platform_wheels:
-            assert len(platform_wheels) == 2
+            assert len(platform_wheels) == 2, (
+                package,
+                wheel_filename,
+                len(platform_wheels),
+            )
             merge_wheels(platform_wheels[0], platform_wheels[1], wheels_dir)
         else:
             raise IncompatibleWheelError(

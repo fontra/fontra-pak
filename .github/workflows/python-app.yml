@@ -162,10 +162,15 @@ jobs:
           node-version: 20.x
           cache: "npm"
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.13"
+
+      - name: Patch requirements.txt
+        if: github.ref_type == 'tag'
+        run: |
+          python scripts/patch_requirements.py ${{ github.ref_name }}
 
       - name: Install dependencies
         run: |
@@ -185,10 +190,9 @@ jobs:
         id: upload_artifact
         uses: actions/upload-artifact@v5
         with:
-          name: fontrapak
+          name: FontraPakUbuntu
           path: ./dist/fontrapak
 
-  
   create-github-release:
     runs-on: ubuntu-latest
 
@@ -206,7 +210,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
       - name: Retrieve Artifact
         uses: actions/download-artifact@v6
@@ -220,8 +224,8 @@ jobs:
 
       - name: Tar-gzip Linux Binary
         run: |
-          cd ./downloaded-artifact/fontrapak
-          tar -czvf fontrapak.tgz "fontrapak"
+          cd ./downloaded-artifact/FontraPakUbuntu
+          tar -czvf FontraPakUbuntu.tgz "fontrapak"
 
 
       - name: Display structure of downloaded files
@@ -241,7 +245,7 @@ jobs:
           files: |
             ./downloaded-artifact/FontraPakWindows/*.zip
             ./downloaded-artifact/FontraPakMacOS/*.dmg
-            ./dowloaded-artifact/fontrapak/*.tgz
+            ./downloaded-artifact/FontraPakUbuntu/*.tgz
 
       - name: Update website / Repository Dispatch
         uses: peter-evans/repository-dispatch@v4

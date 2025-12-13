@@ -181,7 +181,9 @@ jobs:
       - name: Build executable
         run: |
           pyinstaller FontraPak.spec -y
-          tar -czvf dist/FontraPak-Ubuntu.tgz dist/Fontra\ Pak
+          mv dist/Fontra\ Pak dist/fontrapak
+          cd ./dist
+          tar -czvf FontraPak-Ubuntu.tgz fontrapak
 
       - name: Run tests
         run: |

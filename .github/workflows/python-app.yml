@@ -178,10 +178,11 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r requirements-dev.txt
 
-      - name: Build exe
+      - name: Build executable
         run: |
           pyinstaller FontraPak.spec -y
-          mv dist/Fontra\ Pak dist/fontrapak
+          tar -czvf dist/FontraPak-Ubuntu.tgz dist/Fontra\ Pak
+
       - name: Run tests
         run: |
           pytest
@@ -221,12 +222,6 @@ jobs:
         run: |
           cd ./downloaded-artifact/FontraPakWindows
           zip -q FontraPak-Windows.zip "Fontra Pak.exe"
-
-      - name: Tar-gzip Linux Binary
-        run: |
-          cd ./downloaded-artifact/FontraPakUbuntu
-          tar -czvf FontraPakUbuntu.tgz "fontrapak"
-
 
       - name: Display structure of downloaded files
         run: ls -R

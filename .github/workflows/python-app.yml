@@ -188,11 +188,10 @@ jobs:
           pytest
 
       - name: Storing Ubuntu Artifacts
-        id: upload_artifact
         uses: actions/upload-artifact@v5
         with:
           name: FontraPakUbuntu
-          path: ./dist/fontrapak
+          path: ./dist/*.tgz
 
   create-github-release:
     runs-on: ubuntu-latest

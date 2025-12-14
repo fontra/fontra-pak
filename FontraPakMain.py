@@ -139,6 +139,8 @@ class FontraMainWidget(QMainWindow):
     def __init__(self, port):
         super().__init__()
         self.port = port
+        self.openProjects = set()
+
         self.setWindowTitle("Fontra Pak")
         self.resize(720, 480)
 
@@ -194,6 +196,17 @@ class FontraMainWidget(QMainWindow):
         self.show()
 
     def closeEvent(self, event):
+        if self.openProjects:
+            response = showMessageDialog(
+                "There are still open fonts, are you sure you want to quit?",
+                "Quitting Fontra Pak will cause open browser tabs to stop working.",
+                buttons=QMessageBox.StandardButton.Close
+                | QMessageBox.StandardButton.Cancel,
+                defaultButton=QMessageBox.StandardButton.Cancel,
+            )
+            if response == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+
         self.settings.setValue("size", self.size())
         self.settings.setValue("pos", self.pos())
 
@@ -249,10 +262,12 @@ class FontraMainWidget(QMainWindow):
             openFile(fontPath, self.port)
 
     def messageFromServer(self, item):
-        action, path, options = item
+        action, arguments = item
         handler = getattr(self, action, None)
         if handler is not None:
-            handler(path, options)
+            handler(*arguments)
+        else:
+            print("unknown server action:", action)
 
     def exportAs(self, path, options):
         sourcePath = pathlib.Path(path)
@@ -345,6 +360,12 @@ class FontraMainWidget(QMainWindow):
             callInMainThread(exportFinished)
 
         callInNewThread(exportProcessJoin)
+
+    def projectOpened(self, projectIdentifier):
+        self.openProjects.add(projectIdentifier)
+
+    def projectClosed(self, projectIdentifier):
+        self.openProjects.discard(projectIdentifier)
 
     def checkForUpdate(self, msDelay):
         QTimer.singleShot(msDelay, lambda: callInNewThread(self._checkForUpdate))
@@ -490,7 +511,12 @@ def openFile(path, port):
 
 
 def showMessageDialog(
-    message, infoText, detailedText=None, icon=QMessageBox.Icon.Warning
+    message,
+    infoText,
+    detailedText=None,
+    icon=QMessageBox.Icon.Warning,
+    buttons=None,
+    defaultButton=None,
 ):
     dialog = QMessageBox()
     if icon is not None:
@@ -500,7 +526,12 @@ def showMessageDialog(
     if detailedText is not None:
         dialog.setStyleSheet("QTextEdit { font-weight: regular; }")
         dialog.setDetailedText(detailedText)
-    dialog.exec()
+    if buttons is not None:
+        dialog.setStandardButtons(buttons)
+    if defaultButton is not None:
+        dialog.setDefaultButton(defaultButton)
+
+    return dialog.exec()
 
 
 @dataclass
@@ -511,7 +542,18 @@ class FontraPakExportManager:
         return [typ for (_name, typ) in exportFileTypes]
 
     async def exportAs(self, projectIdentifier, options):
-        self.appQueue.put(("exportAs", projectIdentifier, options))
+        self.appQueue.put(("exportAs", (projectIdentifier, options)))
+
+
+@dataclass
+class ProjectOpenListener:
+    appQueue: multiprocessing.Queue
+
+    def projectOpened(self, projectIdentifier: str) -> None:
+        self.appQueue.put(("projectOpened", (projectIdentifier,)))
+
+    def projectClosed(self, projectIdentifier: str) -> None:
+        self.appQueue.put(("projectClosed", (projectIdentifier,)))
 
 
 def runFontraServer(host, port, queue):
@@ -522,7 +564,9 @@ def runFontraServer(host, port, queue):
     )
 
     projectManager = FileSystemProjectManager(
-        None, exportManager=FontraPakExportManager(queue)
+        None,
+        exportManager=FontraPakExportManager(queue),
+        projectOpenListener=ProjectOpenListener(queue),
     )
 
     server = FontraServer(

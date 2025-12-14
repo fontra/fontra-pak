@@ -530,6 +530,8 @@ def showMessageDialog(
         dialog.setStandardButtons(buttons)
     if defaultButton is not None:
         dialog.setDefaultButton(defaultButton)
+        # FIXME: The following does *not* make "escape" equivalent to the default button
+        dialog.setEscapeButton(defaultButton)
 
     return dialog.exec()
 

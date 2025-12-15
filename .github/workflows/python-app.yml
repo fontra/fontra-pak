@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: macOS Notarize -- Install Certificates
-        if: ${{ matrix.NAME == "MacOS" }}
+        if: ${{ matrix.NAME == 'MacOS' }}
         run: |
           echo ${{ secrets.CERTIFICATE_P12 }} | base64 --decode > certificate.p12
           security import certificate.p12 -P ${{ secrets.CERTIFICATE_PASSWORD }}
@@ -68,7 +68,7 @@ jobs:
           pip install -r requirements.txt | tee pip_log.txt
 
       - name: Make and install universal wheels
-        if: ${{ matrix.NAME == "MacOS" }}
+        if: ${{ matrix.NAME == 'MacOS' }}
         run: |
           python macos/ensure_universal_wheels.py pip_log.txt
           pip install --force build/universal_wheels/*.whl
@@ -83,7 +83,7 @@ jobs:
           pytest
 
       - name: macOS Notarize -- Codesign and Notarize
-        if: ${{ matrix.NAME == "MacOS" }}
+        if: ${{ matrix.NAME == 'MacOS' }}
         run: |
           APP_PATH="dist/Fontra Pak.app"
           DMG_PATH="dist/FontraPak-${{ matrix.NAME }}.dmg"
@@ -110,13 +110,13 @@ jobs:
           xcrun stapler staple "$DMG_PATH"
 
       - name: Zip Windows exe
-        if: ${{ matrix.NAME == "Windows" }}
+        if: ${{ matrix.NAME == 'Windows' }}
         run: |
           cd ./dist
           zip -q FontraPak-${{ matrix.NAME }}.zip "Fontra Pak.exe"
 
       - name: Archive executable with tar
-        if: ${{ matrix.NAME != "MacOS" && matrix.NAME != "Windows" }}
+        if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}
         run: |
           cd ./dist
           tar -czvf FontraPak-${{ matrix.NAME }}.tgz fontrapak

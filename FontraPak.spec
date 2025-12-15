@@ -159,7 +159,7 @@ else:
         a.zipfiles,
         a.datas,
         [],
-        name="Fontra Pak",
+        name="Fontra Pak" if sys.platform == "win32" else "fontrapak",
         debug=False,
         bootloader_ignore_signals=False,
         strip=False,

@@ -113,7 +113,7 @@ jobs:
         if: ${{ matrix.NAME == 'Windows' }}
         run: |
           cd ./dist
-          zip -q FontraPak-${{ matrix.NAME }}.zip "Fontra Pak.exe"
+          Compress-Archive -Path "Fontra Pak.exe" -Destination FontraPak-${{ matrix.NAME }}.zip
 
       - name: Archive executable with tar
         if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}

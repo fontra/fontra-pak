@@ -10,7 +10,7 @@ on:
       - "*.*.*"
 
 jobs:
-  build-applications:
+  build-application:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -136,7 +136,7 @@ jobs:
     permissions:
       contents: write
 
-    needs: [build-applications]
+    needs: [build-application]
     if: github.ref_type == 'tag'
 
     steps:

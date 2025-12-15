@@ -4,7 +4,9 @@ Fontra Pak is a cross-platform, standalone, bundled [Fontra](https://github.com/
 
 ## Download
 
-Nightly builds can be downloaded from the topmost [“Build Application”](https://github.com/fontra/fontra-pak/actions) workflow. You need to be signed in to GitHub to be able to download.
+Binaries for MacOS (11 and up), Windows (10 and up) and Ubuntu x86_64 can be [downloaded under releases](https://github.com/fontra/fontra-pak/releases/latest)
+
+For Linux, there are more options, such as `flatpak` and `snap`: https://docs.fontra.xyz/how-tos/installation/installing-fontra-pak-linux/
 
 ## Run locally from source
 

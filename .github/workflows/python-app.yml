@@ -72,6 +72,9 @@ jobs:
         run: |
           python macos/ensure_universal_wheels.py pip_log.txt
           pip install --force build/universal_wheels/*.whl
+
+      - name: Install development dependencies
+        run: |
           pip install -r requirements-dev.txt
 
       - name: Build app with PyInstaller

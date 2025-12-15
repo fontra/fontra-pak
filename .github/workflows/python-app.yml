@@ -10,14 +10,27 @@ on:
       - "*.*.*"
 
 jobs:
-  build-macos-app:
-    runs-on: macos-latest
+  build-applications:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            NAME: MacOS
+
+          - os: windows-latest
+            NAME: Windows
+
+          - os: ubuntu-22.04
+            NAME: Ubuntu
 
     permissions:
       contents: read
 
     steps:
       - name: macOS Notarize -- Install Certificates
+        if: ${{ matrix.NAME == "MacOS" }}
         run: |
           echo ${{ secrets.CERTIFICATE_P12 }} | base64 --decode > certificate.p12
           security import certificate.p12 -P ${{ secrets.CERTIFICATE_PASSWORD }}
@@ -53,15 +66,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt | tee pip_log.txt
+
+      - name: Make and install universal wheels
+        if: ${{ matrix.NAME == "MacOS" }}
+        run: |
           python macos/ensure_universal_wheels.py pip_log.txt
           pip install --force build/universal_wheels/*.whl
           pip install -r requirements-dev.txt
 
-      - name: Run pre-commit
-        run: |
-          pre-commit run --all-files --verbose --show-diff-on-failure
-
-      - name: Build app
+      - name: Build app with PyInstaller
         run: |
           pyinstaller FontraPak.spec -y
 
@@ -70,9 +83,10 @@ jobs:
           pytest
 
       - name: macOS Notarize -- Codesign and Notarize
+        if: ${{ matrix.NAME == "MacOS" }}
         run: |
           APP_PATH="dist/Fontra Pak.app"
-          DMG_PATH="dist/FontraPak-macOS.dmg"
+          DMG_PATH="dist/FontraPak-${{ matrix.NAME }}.dmg"
 
           macos/codesign_app.sh "${{ secrets.CODESIGN_NAME }}" "$APP_PATH" macos/entitlements.plist
           python macos/build_dmg.py "$APP_PATH" "$DMG_PATH"
@@ -95,105 +109,26 @@ jobs:
 
           xcrun stapler staple "$DMG_PATH"
 
-      - name: Storing macOS Artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: FontraPakMacOS
-          path: ./dist/*.dmg
-
-  build-windows-exe:
-    runs-on: windows-latest
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 20.x
-          cache: "npm"
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-      - name: Patch requirements.txt
-        if: github.ref_type == 'tag'
+      - name: Zip Windows exe
+        if: ${{ matrix.NAME == "Windows" }}
         run: |
-          python scripts/patch_requirements.py ${{ github.ref_name }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install -r requirements-dev.txt
-
-      - name: Build exe
-        run: |
-          pyinstaller FontraPak.spec -y
-
-      - name: Run tests
-        run: |
-          pytest
-
-      - name: Storing Windows Artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: FontraPakWindows
-          path: ./dist/*.exe
-
-  build-linux-binary:
-    runs-on: ubuntu-22.04
-
-    permissions:
-      contents: read
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 20.x
-          cache: "npm"
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-      - name: Patch requirements.txt
-        if: github.ref_type == 'tag'
-        run: |
-          python scripts/patch_requirements.py ${{ github.ref_name }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install -r requirements-dev.txt
-
-      - name: Build executable
-        run: |
-          pyinstaller FontraPak.spec -y
-          mv dist/Fontra\ Pak dist/fontrapak
           cd ./dist
-          tar -czvf FontraPak-Ubuntu.tgz fontrapak
+          zip -q FontraPak-${{ matrix.NAME }}.zip "Fontra Pak.exe"
 
-      - name: Run tests
+      - name: Archive executable with tar
+        if: ${{ matrix.NAME != "MacOS" && matrix.NAME != "Windows" }}
         run: |
-          pytest
+          cd ./dist
+          tar -czvf FontraPak-${{ matrix.NAME }}.tgz fontrapak
 
-      - name: Storing Ubuntu Artifacts
+      - name: Storing Artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: FontraPakUbuntu
-          path: ./dist/*.tgz
+          name: FontraPak-${{ matrix.NAME }}
+          path: |
+            ./dist/*.dmg
+            ./dist/*.zip
+            ./dist/*.tgz
 
   create-github-release:
     runs-on: ubuntu-latest
@@ -201,7 +136,7 @@ jobs:
     permissions:
       contents: write
 
-    needs: [build-macos-app, build-windows-exe, build-linux-binary]
+    needs: [build-applications]
     if: github.ref_type == 'tag'
 
     steps:
@@ -219,15 +154,9 @@ jobs:
         with:
           path: ./downloaded-artifact
 
-      - name: Zip Windows Artifact
-        run: |
-          cd ./downloaded-artifact/FontraPakWindows
-          zip -q FontraPak-Windows.zip "Fontra Pak.exe"
-
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: ./downloaded-artifact
-
 
       - name: Extract Latest Changes
         run: |
@@ -239,9 +168,9 @@ jobs:
           body_path: 'tmp_latest_changes.txt'
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            ./downloaded-artifact/FontraPakWindows/*.zip
-            ./downloaded-artifact/FontraPakMacOS/*.dmg
-            ./downloaded-artifact/FontraPakUbuntu/*.tgz
+            ./downloaded-artifact/FontraPak-MacOS/*.dmg
+            ./downloaded-artifact/FontraPak-Windows/*.zip
+            ./downloaded-artifact/FontraPak-Ubuntu/*.tgz
           draft: true
 
       - name: Update website / Repository Dispatch

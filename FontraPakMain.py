@@ -418,7 +418,7 @@ def _fetchLatestReleaseInfo() -> tuple[str, str | None]:
     assetNamePart = None
     match sys.platform:
         case "darwin":
-            assetNamePart = "macOS"
+            assetNamePart = "MacOS"
         case "win32":
             assetNamePart = "Windows"
 

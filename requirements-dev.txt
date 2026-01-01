@@ -2,4 +2,4 @@ pyinstaller==6.17.0
 # Use patched fork to work around https://github.com/matthew-brett/delocate/issues/228
 git+https://github.com/justvanrossum/delocate.git
 # delocate==0.12.0
-pytest==9.0.1
+pytest==9.0.2

@@ -140,9 +140,13 @@ if sys.platform == "darwin":
                     CFBundleTypeExtensions=[
                         "ttf",
                         "otf",
+                        "woff",
+                        "woff2",
+                        "ttx",
                         "designspace",
                         "ufo",
                         "glyphs",
+                        "glyphspackage",
                         "fontra",
                         "rcjk",
                     ],

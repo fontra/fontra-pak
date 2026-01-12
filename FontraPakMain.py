@@ -79,10 +79,10 @@ mainText = """
 Your fonts will stay on your computer and will not be uploaded anywhere.
 <br>
 <br>
-Fontra Pak reads and writes .ufo, .designspace, .rcjk and .fontra
+Fontra Pak reads and writes .ufo, .designspace, .fontra, and .rcjk, and has
+partial support for reading and writing .glyphs and .glyphspackage files.
 <br>
-Additionally, it can read (not write) .ttf, .otf, .woff, .woff2, and (with some limitations)
-.glyphs and .glyphspackage
+Additionally, it can read (but not write) .ttf, .otf, .woff, .woff2, and .ttx.
 """
 
 fileTypes = [

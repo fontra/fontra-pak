@@ -11,13 +11,6 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 10
-    ignore:
-      # PyQt6 6.5.0 does not support macOS 10.15 anymore, so for now
-      # we'll stick to PyQt6==6.4.2 and PyQt6-Qt6==6.4.3
-      - dependency-name: "PyQt6"
-      - dependency-name: "PyQt6-Qt6"
-      # later setuptools cause pkg_resources warnings, let's pin for now
-      - dependency-name: "setuptools"
     groups:
       python-packages:
         patterns:

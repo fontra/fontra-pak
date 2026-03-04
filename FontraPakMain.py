@@ -469,6 +469,7 @@ async def exportFontToPathAsync(sourcePath, destPath, fileExtension):
             steps=dropDiscreteAxes
             + [
                 dict(filter="decompose-composites", onlyVariableComposites=True),
+                dict(filter="propagate-anchors"),
                 dict(filter="drop-unreachable-glyphs"),
                 dict(
                     output="compile-fontmake",

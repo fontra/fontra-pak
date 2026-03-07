@@ -25,6 +25,7 @@ from fontra.backends.copy import copyFont
 from fontra.backends.populate import populateBackend
 from fontra.core.classes import DiscreteFontAxis
 from fontra.core.server import FontraServer, findFreeTCPPort
+from fontra.core.urlfragment import dumpURLFragment
 from fontra.filesystem.projectmanager import FileSystemProjectManager
 from PyQt6.QtCore import (
     QEvent,
@@ -43,6 +44,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
+    QPlainTextEdit,
     QProgressDialog,
     QPushButton,
     QSizePolicy,
@@ -112,6 +114,9 @@ exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
 
 
+applicationSettings = QSettings("xyz.fontra", "FontraPak")
+
+
 class FontraApplication(QApplication):
     def __init__(self, argv, port):
         self.port = port
@@ -144,10 +149,8 @@ class FontraMainWidget(QMainWindow):
         self.setWindowTitle("Fontra Pak")
         self.resize(720, 480)
 
-        self.settings = QSettings("xyz.fontra", "FontraPak")
-
-        self.resize(self.settings.value("size", QSize(720, 480)))
-        self.move(self.settings.value("pos", QPoint(50, 50)))
+        self.resize(applicationSettings.value("size", QSize(720, 480)))
+        self.move(applicationSettings.value("pos", QPoint(50, 50)))
 
         self.setAcceptDrops(True)
 
@@ -175,6 +178,21 @@ class FontraMainWidget(QMainWindow):
         layout.addWidget(buttonDocs, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
 
         layout.addWidget(self.label, 1, 0, 1, 2)
+
+        self.textBox = QPlainTextEdit(applicationSettings.value("sampleText", ""), self)
+        self.textBox.setFixedHeight(50)
+        self.textBox.setPlaceholderText(
+            "Enter some text to launch into the editor view,\n"
+            + "or leave empty to launch into the font overview"
+        )
+
+        self.textBox.textChanged.connect(
+            lambda: applicationSettings.setValue(
+                "sampleText", self.textBox.toPlainText()
+            )
+        )
+        layout.addWidget(QLabel("Sample text:"), 2, 0)
+        layout.addWidget(self.textBox, 3, 0, 1, 2)
 
         layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 4, 0)
 
@@ -207,8 +225,8 @@ class FontraMainWidget(QMainWindow):
             if response == QMessageBox.StandardButton.Cancel:
                 event.ignore()
 
-        self.settings.setValue("size", self.size())
-        self.settings.setValue("pos", self.pos())
+        applicationSettings.setValue("size", self.size())
+        applicationSettings.setValue("pos", self.pos())
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -508,7 +526,11 @@ def openFile(path, port):
         del parts[0]
     path = "/".join(quote(part, safe="") for part in parts)
 
-    webbrowser.open(f"http://localhost:{port}/fontoverview.html?project={path}")
+    sampleText = applicationSettings.value("sampleText", "")
+    urlFragment = dumpURLFragment({"text": sampleText}) if sampleText else ""
+    view = "editor" if sampleText else "fontoverview"
+
+    webbrowser.open(f"http://localhost:{port}/{view}.html?project={path}{urlFragment}")
 
 
 def showMessageDialog(

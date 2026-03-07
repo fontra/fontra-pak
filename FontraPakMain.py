@@ -179,22 +179,22 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(self.label, 1, 0, 1, 2)
 
-        self.textBox = QPlainTextEdit(
+        self.sampleTextBox = QPlainTextEdit(
             applicationSettings.value("editorSampleText", ""), self
         )
-        self.textBox.setFixedHeight(50)
-        self.textBox.setPlaceholderText(
+        self.sampleTextBox.setFixedHeight(50)
+        self.sampleTextBox.setPlaceholderText(
             "Enter some text to launch into the editor view,\n"
             + "or leave empty to launch into the font overview"
         )
 
-        self.textBox.textChanged.connect(
+        self.sampleTextBox.textChanged.connect(
             lambda: applicationSettings.setValue(
-                "editorSampleText", self.textBox.toPlainText()
+                "editorSampleText", self.sampleTextBox.toPlainText()
             )
         )
         layout.addWidget(QLabel("Sample text:"), 2, 0)
-        layout.addWidget(self.textBox, 3, 0, 1, 2)
+        layout.addWidget(self.sampleTextBox, 3, 0, 1, 2)
 
         layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 4, 0)
 

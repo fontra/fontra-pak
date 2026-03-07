@@ -179,7 +179,9 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(self.label, 1, 0, 1, 2)
 
-        self.textBox = QPlainTextEdit(applicationSettings.value("sampleText", ""), self)
+        self.textBox = QPlainTextEdit(
+            applicationSettings.value("editorSampleText", ""), self
+        )
         self.textBox.setFixedHeight(50)
         self.textBox.setPlaceholderText(
             "Enter some text to launch into the editor view,\n"
@@ -188,7 +190,7 @@ class FontraMainWidget(QMainWindow):
 
         self.textBox.textChanged.connect(
             lambda: applicationSettings.setValue(
-                "sampleText", self.textBox.toPlainText()
+                "editorSampleText", self.textBox.toPlainText()
             )
         )
         layout.addWidget(QLabel("Sample text:"), 2, 0)
@@ -526,7 +528,7 @@ def openFile(path, port):
         del parts[0]
     path = "/".join(quote(part, safe="") for part in parts)
 
-    sampleText = applicationSettings.value("sampleText", "")
+    sampleText = applicationSettings.value("editorSampleText", "")
     urlFragment = dumpURLFragment({"text": sampleText}) if sampleText else ""
     view = "editor" if sampleText else "fontoverview"
 

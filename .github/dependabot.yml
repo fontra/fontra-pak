@@ -11,6 +11,11 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 10
+    ignore:
+      # We try to stick to PyQt6 6.7.1 to keep supporting macOS 11
+      - dependency-name: "PyQt6"
+      - dependency-name: "PyQt6-Qt6"
+      - dependency-name: "PyQt6-sip"
     groups:
       python-packages:
         patterns:

@@ -340,6 +340,7 @@ class FontraMainWidget(QMainWindow):
         def cancelExport():
             nonlocal cancelled
             cancelled = True
+            assert exportProcess.pid is not None
             os.kill(exportProcess.pid, signal.SIGINT)
 
         progressDialog = QProgressDialog(
@@ -666,7 +667,7 @@ def main():
         process = psutil.Process(serverProcess.pid)
         for p in [process] + process.children(recursive=True):
             if sys.platform != "win32":
-                p.send_signal(psutil.signal.SIGINT)
+                p.send_signal(signal.SIGINT)
             else:
                 p.terminate()
 

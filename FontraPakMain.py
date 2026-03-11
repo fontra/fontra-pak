@@ -250,7 +250,9 @@ class FontraMainWidget(QMainWindow):
 
     @property
     def activeFolder(self):
-        activeFolder = self.settings.value("activeFolder", os.path.expanduser("~"))
+        activeFolder = applicationSettings.value(
+            "activeFolder", os.path.expanduser("~")
+        )
         if not os.path.isdir(activeFolder):
             activeFolder = os.path.expanduser("~")
         return activeFolder
@@ -269,7 +271,7 @@ class FontraMainWidget(QMainWindow):
 
         fontPath = getFontPath(fontPath, fileType, fileTypesMapping)
 
-        self.settings.setValue("activeFolder", os.path.dirname(fontPath))
+        applicationSettings.setValue("activeFolder", os.path.dirname(fontPath))
 
         # Create a new empty project on disk
         try:
@@ -312,7 +314,7 @@ class FontraMainWidget(QMainWindow):
 
         destPath = getFontPath(destPath, fileType, exportFileTypesMapping)
 
-        self.settings.setValue("activeFolder", os.path.dirname(destPath))
+        applicationSettings.setValue("activeFolder", os.path.dirname(destPath))
 
         destPath = pathlib.Path(destPath)
 
@@ -338,6 +340,7 @@ class FontraMainWidget(QMainWindow):
         def cancelExport():
             nonlocal cancelled
             cancelled = True
+            assert exportProcess.pid is not None
             os.kill(exportProcess.pid, signal.SIGINT)
 
         progressDialog = QProgressDialog(
@@ -664,7 +667,7 @@ def main():
         process = psutil.Process(serverProcess.pid)
         for p in [process] + process.children(recursive=True):
             if sys.platform != "win32":
-                p.send_signal(psutil.signal.SIGINT)
+                p.send_signal(signal.SIGINT)
             else:
                 p.terminate()
 

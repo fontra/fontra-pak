@@ -89,9 +89,8 @@ Additionally, it can read (but not write) .ttf, .otf, .woff, .woff2, and .ttx.
 
 fileTypes = [
     # name, extension
-    ("Designspace", "designspace"),
     ("Fontra", "fontra"),
-    ("RoboCJK", "rcjk"),
+    ("Designspace", "designspace"),
     ("Unified Font Object", "ufo"),
 ]
 

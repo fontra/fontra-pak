@@ -91,7 +91,6 @@ fileTypes = [
     # name, extension
     ("Fontra", "fontra"),
     ("Designspace", "designspace"),
-    ("RoboCJK", "rcjk"),
     ("Unified Font Object", "ufo"),
 ]
 

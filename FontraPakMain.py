@@ -27,6 +27,7 @@ from fontra.core.classes import DiscreteFontAxis
 from fontra.core.server import FontraServer, findFreeTCPPort
 from fontra.core.urlfragment import dumpURLFragment
 from fontra.filesystem.projectmanager import FileSystemProjectManager
+from fontTools.ttLib.woff2 import compress as woff2Compress
 from PyQt6.QtCore import (
     QEvent,
     QObject,
@@ -102,6 +103,7 @@ exportFileTypes = [
     # name, extension
     ("TrueType", "ttf"),
     ("OpenType", "otf"),
+    ("Webfont", "woff2"),
 ] + fileTypes
 
 exportFileTypesMapping = {
@@ -467,6 +469,12 @@ def exportFontToPath(sourcePath, destPath, fileExtension, logFilePath):
 async def exportFontToPathAsync(sourcePath, destPath, fileExtension):
     sourcePath = pathlib.Path(sourcePath)
     destPath = pathlib.Path(destPath)
+    if fileExtension == "woff2":
+        with tempfile.TemporaryDirectory() as tmpDir:
+            tmpTtfPath = pathlib.Path(tmpDir) / (destPath.stem + ".ttf")
+            await exportFontToPathAsync(sourcePath, tmpTtfPath, "ttf")
+            woff2Compress(str(tmpTtfPath), str(destPath))
+        return
 
     sourceBackend = getFileSystemBackend(sourcePath)
 

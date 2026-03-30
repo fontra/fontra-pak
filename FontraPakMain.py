@@ -199,7 +199,7 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 4, 0)
 
-        if sys.platform in {"darwin", "win32"}:
+        if sys.platform in {"darwin", "win32", "linux"}:
             self.downloadButton = QPushButton("Download latest Fontra Pak", self)
             self.downloadButton.setSizePolicy(
                 QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
@@ -445,6 +445,8 @@ def _fetchLatestReleaseInfo() -> tuple[str, str | None]:
             assetNamePart = "MacOS"
         case "win32":
             assetNamePart = "Windows"
+        case "linux":
+            assetNamePart = "Linux"
 
     if assetNamePart is None:
         return latestVersion, None

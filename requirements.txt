@@ -2,8 +2,8 @@ git+https://github.com/fontra/fontra.git
 git+https://github.com/fontra/fontra-compile.git
 git+https://github.com/fontra/fontra-rcjk.git
 git+https://github.com/fontra/fontra-glyphs.git
-aiohttp==3.13.3
-setuptools==82.0.0
+aiohttp==3.13.5
+setuptools==82.0.1
 PyQt6==6.7.1
 PyQt6-Qt6==6.7.3
 PyQt6-sip==13.10.3

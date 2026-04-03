@@ -10,6 +10,7 @@ on:
       - "*.*.*"
 
 jobs:
+  # ── All platforms build in parallel ──────────────────────────────────────
   build-application:
     runs-on: ${{ matrix.os }}
 
@@ -96,24 +97,26 @@ jobs:
           echo "Run notarytool..."
 
           xcrun notarytool submit \
-            --apple-id "${{ secrets.NOTARIZE_DEVELOPER }}" \
-            --team-id "${{ secrets.NOTARIZE_TEAM_ID }}" \
-            --password "${{ secrets.NOTARIZE_PASSWORD }}" \
-            --output-format json \
-            --wait \
-            $DMG_PATH \
-            | python macos/print_notarize_log.py \
-              "${{ secrets.NOTARIZE_DEVELOPER }}" \
-              "${{ secrets.NOTARIZE_TEAM_ID }}" \
-              "${{ secrets.NOTARIZE_PASSWORD }}"
+          --apple-id "${{ secrets.NOTARIZE_DEVELOPER }}" \
+          --team-id "${{ secrets.NOTARIZE_TEAM_ID }}" \
+          --password "${{ secrets.NOTARIZE_PASSWORD }}" \
+          --output-format json \
+          --wait \
+          $DMG_PATH \
+          | python macos/print_notarize_log.py \
+          "${{ secrets.NOTARIZE_DEVELOPER }}" \
+          "${{ secrets.NOTARIZE_TEAM_ID }}" \
+          "${{ secrets.NOTARIZE_PASSWORD }}"
 
           xcrun stapler staple "$DMG_PATH"
 
-      - name: Zip Windows exe
+      # ── Windows: stage raw exe for installer job ──────────────────────────
+      - name: Stage Windows exe
         if: ${{ matrix.NAME == 'Windows' }}
+        shell: pwsh
         run: |
-          cd ./dist
-          Compress-Archive -Path "Fontra Pak.exe" -Destination FontraPak-${{ matrix.NAME }}.zip
+          New-Item -ItemType Directory -Force -Path staging
+          Copy-Item "dist\Fontra Pak.exe" "staging\Fontra Pak.exe"
 
       - name: Archive executable with tar
         if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}
@@ -127,20 +130,74 @@ jobs:
           name: FontraPak-${{ matrix.NAME }}
           path: |
             ./dist/*.dmg
-            ./dist/*.zip
             ./dist/*.tgz
 
+      - name: Storing Windows exe artifact
+        if: ${{ matrix.NAME == 'Windows' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: FontraPak-Windows-exe
+          path: "staging/Fontra Pak.exe"
+
+  # ── Windows NSIS installer, runs after windows build ─────────────────────
+  windows-installer:
+    needs: build-application
+    runs-on: windows-latest
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+
+      - name: Extract version from tag
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        run: |
+          echo "VERSION=${{ github.ref_name }}" >> $env:GITHUB_ENV
+
+      - name: Set dev version
+        if: github.ref_type != 'tag'
+        shell: pwsh
+        run: |
+          echo "VERSION=dev" >> $env:GITHUB_ENV
+
+      - name: Download Windows exe
+        uses: actions/download-artifact@v8
+        with:
+          name: FontraPak-Windows-exe
+          path: dist
+
+      - name: Verify exe
+        shell: pwsh
+        run: Get-Item "dist\Fontra Pak.exe"
+
+      - name: Install NSIS
+        uses: repolevedavaj/install-nsis@v1.0.3
+        with:
+          nsis-version: "3.10"
+
+      - name: Compile NSIS installer
+        uses: joncloud/makensis-action@v4.1
+        with:
+          script-file: packaging/windows/fontra-pak-installer.nsi
+          arguments: "/V3 /DVERSION=${{ env.VERSION }}"
+
+      - name: Storing Windows installer artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: FontraPak-Windows
+          path: dist/FontraPak-Windows-Setup-${{ env.VERSION }}.exe
+
+  # ── GitHub Release ────────────────────────────────────────────────────────
   create-github-release:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
-    needs: [build-application]
+    needs: [build-application, windows-installer]
     if: github.ref_type == 'tag'
 
     steps:
-
       - name: Git checkout
         uses: actions/checkout@v6
 
@@ -169,7 +226,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./downloaded-artifact/FontraPak-MacOS/*.dmg
-            ./downloaded-artifact/FontraPak-Windows/*.zip
+            ./downloaded-artifact/FontraPak-Windows/FontraPak-Windows-Setup-*.exe
             ./downloaded-artifact/FontraPak-Ubuntu/*.tgz
 
       - name: Update website / Repository Dispatch

@@ -109,11 +109,12 @@ jobs:
 
           xcrun stapler staple "$DMG_PATH"
 
-      - name: Zip Windows exe
+      - name: Stage Windows exe for MSI installer job
         if: ${{ matrix.NAME == 'Windows' }}
+        shell: pwsh
         run: |
-          cd ./dist
-          Compress-Archive -Path "Fontra Pak.exe" -Destination FontraPak-${{ matrix.NAME }}.zip
+          New-Item -ItemType Directory -Force -Path staging
+          Copy-Item "dist\Fontra Pak.exe" "staging\Fontra Pak.exe"
 
       - name: Archive executable with tar
         if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}
@@ -123,12 +124,63 @@ jobs:
 
       - name: Storing Artifacts
         uses: actions/upload-artifact@v7
+        if: ${{ matrix.NAME != 'Windows' }}
         with:
           name: FontraPak-${{ matrix.NAME }}
           path: |
             ./dist/*.dmg
-            ./dist/*.zip
             ./dist/*.tgz
+
+      - name: Storing Windows exe artifact
+        if: ${{ matrix.NAME == 'Windows' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: FontraPak-Windows-exe
+          path: "staging/Fontra Pak.exe"
+
+  windows-installer:
+    needs: build-application
+    runs-on: windows-latest
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+
+      - name: Extract version from tag
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        run: echo "VERSION=${{ github.ref_name }}" >> $env:GITHUB_ENV
+
+      - name: Set dev version
+        if: github.ref_type != 'tag'
+        shell: pwsh
+        run: echo "VERSION=0.0.1" >> $env:GITHUB_ENV
+
+      - name: Download Windows exe
+        uses: actions/download-artifact@v8
+        with:
+          name: FontraPak-Windows-exe
+          path: dist
+
+      - name: Install WiX v6
+        shell: pwsh
+        run: dotnet tool install --global wix --version 6.0.2
+
+      - name: Add WiX UI extension
+        shell: pwsh
+        run: wix extension add --global WixToolset.UI.wixext/6.0.2
+
+      - name: Compile MSI
+        shell: pwsh
+        run: |
+          Set-Location windows
+          wix build Product.wxs -arch x64 -d "Version=${{ env.VERSION }}" -ext WixToolset.UI.wixext -o "$env:GITHUB_WORKSPACE\dist\FontraPak-Windows-${{ env.VERSION }}.msi"
+
+      - name: Storing Windows MSI artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: FontraPak-Windows
+          path: dist/FontraPak-Windows-${{ env.VERSION }}.msi
 
   create-github-release:
     runs-on: ubuntu-latest
@@ -136,7 +188,7 @@ jobs:
     permissions:
       contents: write
 
-    needs: [build-application]
+    needs: [build-application, windows-installer]
     if: github.ref_type == 'tag'
 
     steps:
@@ -169,7 +221,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./downloaded-artifact/FontraPak-MacOS/*.dmg
-            ./downloaded-artifact/FontraPak-Windows/*.zip
+            ./downloaded-artifact/FontraPak-Windows/FontraPak-Windows-*.msi
             ./downloaded-artifact/FontraPak-Ubuntu/*.tgz
 
       - name: Update website / Repository Dispatch

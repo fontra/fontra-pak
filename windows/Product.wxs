@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- windows/Product.wxs -->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="Fontra Pak"
+      Language="1033"
+      Version="$(var.Version)"
+      Manufacturer="Fontra Contributors"
+      UpgradeCode="7D55E932-DDE6-4AEC-BF13-74A2855617E9">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Fontra Pak is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="..\icon\FontraIcon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPHELPLINK" Value="https://fontra.xyz" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Fontra Pak">
+        <Component Id="MainExecutable" Guid="B89F59EB-427A-4D98-B5E9-0E4415334903">
+          <File Id="FontraPakExe"
+                Source="..\dist\Fontra Pak.exe"
+                KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="Fontra Pak">
+        <Component Id="StartMenuShortcut" Guid="53433077-6B28-435E-AB3A-180CC64A9B4D">
+          <Shortcut Id="StartMenuShortcut"
+                    Name="Fontra Pak"
+                    Description="Fontra Pak font editor"
+                    Target="[INSTALLFOLDER]Fontra Pak.exe"
+                    WorkingDirectory="INSTALLFOLDER" />
+          <RemoveFolder Id="AppMenuFolderRemove" On="uninstall" />
+          <RegistryValue Root="HKLM"
+                         Key="Software\Fontra Pak"
+                         Name="StartMenuShortcut"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="F61FDE49-7169-40DA-98B6-B3B3436FB807">
+        <Shortcut Id="DesktopShortcut"
+                  Name="Fontra Pak"
+                  Description="Fontra Pak font editor"
+                  Target="[INSTALLFOLDER]Fontra Pak.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKLM"
+                       Key="Software\Fontra Pak"
+                       Name="DesktopShortcut"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="Fontra Pak" Level="1">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+  </Package>
+</Wix>

@@ -109,13 +109,6 @@ jobs:
 
           xcrun stapler staple "$DMG_PATH"
 
-      - name: Stage Windows exe for MSI installer job
-        if: ${{ matrix.NAME == 'Windows' }}
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path staging
-          Copy-Item "dist\Fontra Pak.exe" "staging\Fontra Pak.exe"
-
       - name: Archive executable with tar
         if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}
         run: |
@@ -129,14 +122,8 @@ jobs:
           name: FontraPak-${{ matrix.NAME }}
           path: |
             ./dist/*.dmg
+            ./dist/*.exe
             ./dist/*.tgz
-
-      - name: Storing Windows exe artifact
-        if: ${{ matrix.NAME == 'Windows' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: FontraPak-Windows-exe
-          path: "staging/Fontra Pak.exe"
 
   windows-installer:
     needs: build-application
@@ -159,7 +146,7 @@ jobs:
       - name: Download Windows exe
         uses: actions/download-artifact@v8
         with:
-          name: FontraPak-Windows-exe
+          name: FontraPak-Windows
           path: dist
 
       - name: Install WiX v6
@@ -179,7 +166,7 @@ jobs:
       - name: Storing Windows MSI artifact
         uses: actions/upload-artifact@v7
         with:
-          name: FontraPak-Windows
+          name: FontraPak-Windows-msi
           path: dist/FontraPak-Windows-${{ env.VERSION }}.msi
 
   create-github-release:
@@ -221,7 +208,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./downloaded-artifact/FontraPak-MacOS/*.dmg
-            ./downloaded-artifact/FontraPak-Windows/FontraPak-Windows-*.msi
+            ./downloaded-artifact/FontraPak-Windows-msi/FontraPak-Windows-*.msi
             ./downloaded-artifact/FontraPak-Ubuntu/*.tgz
 
       - name: Update website / Repository Dispatch

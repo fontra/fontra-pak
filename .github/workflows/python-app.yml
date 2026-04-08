@@ -115,15 +115,21 @@ jobs:
           cd ./dist
           tar -czvf FontraPak-${{ matrix.NAME }}.tgz fontrapak
 
-      - name: Storing Artifacts
+      - name: Storing MacOS and Linux Artifacts
         uses: actions/upload-artifact@v7
         if: ${{ matrix.NAME != 'Windows' }}
         with:
           name: FontraPak-${{ matrix.NAME }}
           path: |
             ./dist/*.dmg
-            ./dist/*.exe
             ./dist/*.tgz
+      - name: Storing Windows Artifacts
+        uses: actions/upload-artifact@v7
+        if: ${{ matrix.NAME == 'Windows' }}
+        with:
+          name: FontraPak-${{ matrix.NAME }}-Portable
+          path: |
+            ./dist/*.exe
 
   windows-installer:
     needs: build-application
@@ -146,7 +152,7 @@ jobs:
       - name: Download Windows exe
         uses: actions/download-artifact@v8
         with:
-          name: FontraPak-Windows
+          name: FontraPak-Windows-Portable
           path: dist
 
       - name: Install WiX v6
@@ -166,7 +172,7 @@ jobs:
       - name: Storing Windows MSI artifact
         uses: actions/upload-artifact@v7
         with:
-          name: FontraPak-Windows-msi
+          name: FontraPak-Windows
           path: dist/FontraPak-Windows-${{ env.VERSION }}.msi
 
   create-github-release:
@@ -208,7 +214,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./downloaded-artifact/FontraPak-MacOS/*.dmg
-            ./downloaded-artifact/FontraPak-Windows-msi/FontraPak-Windows-*.msi
+            ./downloaded-artifact/FontraPak-Windows/*.msi
             ./downloaded-artifact/FontraPak-Ubuntu/*.tgz
 
       - name: Update website / Repository Dispatch

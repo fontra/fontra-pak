@@ -14,7 +14,7 @@
     <Icon Id="AppIcon" SourceFile="..\icon\FontraIcon.ico" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
     <Property Id="ARPHELPLINK" Value="https://fontra.xyz" />
-    <Property Id="CREATEDESKTOPSHORTCUT" Value="1" />
+
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="Fontra Pak">
         <Component Id="MainExecutable" Guid="B89F59EB-427A-4D98-B5E9-0E4415334903">
@@ -46,7 +46,6 @@
 
     <StandardDirectory Id="DesktopFolder">
       <Component Id="DesktopShortcut" Guid="F61FDE49-7169-40DA-98B6-B3B3436FB807">
-        <Condition>CREATEDESKTOPSHORTCUT="1"</Condition>
         <Shortcut Id="DesktopShortcut"
                   Name="Fontra Pak"
                   Description="Fontra Pak font editor"

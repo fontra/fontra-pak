@@ -444,7 +444,7 @@ def _fetchLatestReleaseInfo() -> tuple[str, str | None]:
         case "darwin":
             assetNamePart = "MacOS"
         case "win32":
-            assetNamePart = "Windows"
+            assetNamePart = "Windows-Installer"
         case "linux":
             assetNamePart = "Linux"
 

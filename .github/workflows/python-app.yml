@@ -109,12 +109,6 @@ jobs:
 
           xcrun stapler staple "$DMG_PATH"
 
-      - name: Zip Windows exe
-        if: ${{ matrix.NAME == 'Windows' }}
-        run: |
-          cd ./dist
-          Compress-Archive -Path "Fontra Pak.exe" -Destination FontraPak-${{ matrix.NAME }}.zip
-
       - name: Archive executable with tar
         if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}
         run: |
@@ -127,8 +121,47 @@ jobs:
           name: FontraPak-${{ matrix.NAME }}
           path: |
             ./dist/*.dmg
-            ./dist/*.zip
+            ./dist/*.exe
             ./dist/*.tgz
+
+  windows-installer:
+    needs: build-application
+    runs-on: windows-latest
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+
+      - name: Extract version from tag
+        if: github.ref_type == 'tag'
+        run: echo "VERSION=${{ github.ref_name }}" >> $env:GITHUB_ENV
+
+      - name: Set dev version
+        if: github.ref_type != 'tag'
+        run: echo "VERSION=0.0.0" >> $env:GITHUB_ENV
+
+      - name: Download Windows exe
+        uses: actions/download-artifact@v8
+        with:
+          name: FontraPak-Windows
+          path: dist
+
+      - name: Install WiX v6
+        run: dotnet tool install --global wix --version 6.0.2
+
+      - name: Add WiX UI extension
+        run: wix extension add --global WixToolset.UI.wixext/6.0.2
+
+      - name: Compile MSI
+        run: |
+          Set-Location windows
+          wix build Product.wxs -arch x64 -d "Version=${{ env.VERSION }}" -ext WixToolset.UI.wixext -o "$env:GITHUB_WORKSPACE\dist\FontraPak-Windows-Installer.msi"
+
+      - name: Storing Windows MSI artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: FontraPak-Windows-Installer
+          path: dist/*.msi
 
   create-github-release:
     runs-on: ubuntu-latest
@@ -136,7 +169,7 @@ jobs:
     permissions:
       contents: write
 
-    needs: [build-application]
+    needs: [build-application, windows-installer]
     if: github.ref_type == 'tag'
 
     steps:
@@ -154,6 +187,11 @@ jobs:
         with:
           path: ./downloaded-artifact
 
+      - name: Zip Windows .exe
+        run: |
+          cd ./downloaded-artifact/FontraPak-Windows
+          zip -r FontraPak-Windows.zip "Fontra Pak.exe"
+
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: ./downloaded-artifact
@@ -165,23 +203,25 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          draft: true
           body_path: 'tmp_latest_changes.txt'
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./downloaded-artifact/FontraPak-MacOS/*.dmg
+            ./downloaded-artifact/FontraPak-Windows-Installer/*.msi
             ./downloaded-artifact/FontraPak-Windows/*.zip
             ./downloaded-artifact/FontraPak-Ubuntu/*.tgz
 
-      - name: Update website / Repository Dispatch
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          token: ${{ secrets.WEBSITE_PAT }}
-          repository: fontra/fontra-website
-          event-type: release-event
+      # - name: Update website / Repository Dispatch
+      #   uses: peter-evans/repository-dispatch@v4
+      #   with:
+      #     token: ${{ secrets.WEBSITE_PAT }}
+      #     repository: fontra/fontra-website
+      #     event-type: release-event
 
-      - name: Update flatpak / Repository Dispatch
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          token: ${{ secrets.FLATPAK_PAT }}
-          repository: fontra/fontra-flatpak
-          event-type: release-event
+      # - name: Update flatpak / Repository Dispatch
+      #   uses: peter-evans/repository-dispatch@v4
+      #   with:
+      #     token: ${{ secrets.FLATPAK_PAT }}
+      #     repository: fontra/fontra-flatpak
+      #     event-type: release-event

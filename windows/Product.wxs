@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- windows/Product.wxs -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package
       Name="Fontra Pak"
@@ -10,6 +9,8 @@
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of Fontra Pak is already installed." />
     <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
 
     <Icon Id="AppIcon" SourceFile="..\icon\FontraIcon.ico" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
@@ -27,14 +28,14 @@
 
     <StandardDirectory Id="ProgramMenuFolder">
       <Directory Id="AppMenuFolder" Name="Fontra Pak">
-        <Component Id="StartMenuShortcut" Guid="53433077-6B28-435E-AB3A-180CC64A9B4D">
+        <Component Id="StartMenuShortcutComponent" Guid="53433077-6B28-435E-AB3A-180CC64A9B4D">
           <Shortcut Id="StartMenuShortcut"
                     Name="Fontra Pak"
                     Description="Fontra Pak font editor"
                     Target="[INSTALLFOLDER]Fontra Pak.exe"
                     WorkingDirectory="INSTALLFOLDER" />
           <RemoveFolder Id="AppMenuFolderRemove" On="uninstall" />
-          <RegistryValue Root="HKLM"
+          <RegistryValue Root="HKCU"
                          Key="Software\Fontra Pak"
                          Name="StartMenuShortcut"
                          Type="integer"
@@ -44,15 +45,16 @@
       </Directory>
     </StandardDirectory>
 
-    <!-- This needs to be opt-in
     <StandardDirectory Id="DesktopFolder">
-      <Component Id="DesktopShortcut" Guid="F61FDE49-7169-40DA-98B6-B3B3436FB807">
+      <Component Id="DesktopShortcutComponent"
+                 Guid="F61FDE49-7169-40DA-98B6-B3B3436FB807"
+                 Condition='INSTALLDESKTOPSHORTCUT = "1"'>
         <Shortcut Id="DesktopShortcut"
                   Name="Fontra Pak"
                   Description="Fontra Pak font editor"
                   Target="[INSTALLFOLDER]Fontra Pak.exe"
                   WorkingDirectory="INSTALLFOLDER" />
-        <RegistryValue Root="HKLM"
+        <RegistryValue Root="HKCU"
                        Key="Software\Fontra Pak"
                        Name="DesktopShortcut"
                        Type="integer"
@@ -60,14 +62,11 @@
                        KeyPath="yes" />
       </Component>
     </StandardDirectory>
-    -->
 
     <Feature Id="MainFeature" Title="Fontra Pak" Level="1">
       <ComponentRef Id="MainExecutable" />
-      <ComponentRef Id="StartMenuShortcut" />
-      <!-- see above, this needs to be opt-in
-      <ComponentRef Id="DesktopShortcut" />
-      -->
+      <ComponentRef Id="StartMenuShortcutComponent" />
+      <ComponentRef Id="DesktopShortcutComponent" />
     </Feature>
   </Package>
 </Wix>

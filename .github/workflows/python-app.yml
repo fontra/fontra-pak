@@ -115,21 +115,14 @@ jobs:
           cd ./dist
           tar -czvf FontraPak-${{ matrix.NAME }}.tgz fontrapak
 
-      - name: Storing MacOS and Linux Artifacts
+      - name: Storing Artifacts
         uses: actions/upload-artifact@v7
-        if: ${{ matrix.NAME != 'Windows' }}
         with:
           name: FontraPak-${{ matrix.NAME }}
           path: |
             ./dist/*.dmg
-            ./dist/*.tgz
-      - name: Storing Windows Artifacts
-        uses: actions/upload-artifact@v7
-        if: ${{ matrix.NAME == 'Windows' }}
-        with:
-          name: FontraPak-${{ matrix.NAME }}-Portable
-          path: |
             ./dist/*.exe
+            ./dist/*.tgz
 
   windows-installer:
     needs: build-application
@@ -152,7 +145,7 @@ jobs:
       - name: Download Windows exe
         uses: actions/download-artifact@v8
         with:
-          name: FontraPak-Windows-Portable
+          name: FontraPak-Windows
           path: dist
 
       - name: Install WiX v6
@@ -167,13 +160,13 @@ jobs:
         shell: pwsh
         run: |
           Set-Location windows
-          wix build Product.wxs -arch x64 -d "Version=${{ env.VERSION }}" -ext WixToolset.UI.wixext -o "$env:GITHUB_WORKSPACE\dist\FontraPak-Windows-${{ env.VERSION }}.msi"
+          wix build Product.wxs -arch x64 -d "Version=${{ env.VERSION }}" -ext WixToolset.UI.wixext -o "$env:GITHUB_WORKSPACE\dist\FontraPak-Windows-Installer.msi"
 
       - name: Storing Windows MSI artifact
         uses: actions/upload-artifact@v7
         with:
-          name: FontraPak-Windows
-          path: dist/FontraPak-Windows-${{ env.VERSION }}.msi
+          name: FontraPak-Windows-Installer
+          path: dist/*.msi
 
   create-github-release:
     runs-on: ubuntu-latest

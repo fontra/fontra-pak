@@ -109,6 +109,12 @@ jobs:
 
           xcrun stapler staple "$DMG_PATH"
 
+      - name: Zip Windows exe
+        if: ${{ matrix.NAME == 'Windows' }}
+        run: |
+          cd ./dist
+          Compress-Archive -Path "Fontra Pak.exe" -Destination FontraPak-${{ matrix.NAME }}.zip
+
       - name: Archive executable with tar
         if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}
         run: |
@@ -122,6 +128,7 @@ jobs:
           path: |
             ./dist/*.dmg
             ./dist/*.exe
+            ./dist/*.zip
             ./dist/*.tgz
 
   windows-installer:
@@ -202,7 +209,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./downloaded-artifact/FontraPak-MacOS/*.dmg
-            ./downloaded-artifact/FontraPak-Windows/*.msi
+            ./downloaded-artifact/FontraPak-Windows-Installer/*.msi
+            ./downloaded-artifact/FontraPak-Windows/*.zip
             ./downloaded-artifact/FontraPak-Ubuntu/*.tgz
 
       - name: Update website / Repository Dispatch

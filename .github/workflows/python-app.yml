@@ -109,12 +109,6 @@ jobs:
 
           xcrun stapler staple "$DMG_PATH"
 
-      - name: Zip Windows exe
-        if: ${{ matrix.NAME == 'Windows' }}
-        run: |
-          cd ./dist
-          Compress-Archive -Path "Fontra Pak.exe" -Destination FontraPak-${{ matrix.NAME }}.zip
-
       - name: Archive executable with tar
         if: ${{ matrix.NAME != 'MacOS' && matrix.NAME != 'Windows' }}
         run: |
@@ -128,7 +122,6 @@ jobs:
           path: |
             ./dist/*.dmg
             ./dist/*.exe
-            ./dist/*.zip
             ./dist/*.tgz
 
   windows-installer:
@@ -193,6 +186,11 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ./downloaded-artifact
+
+      - name: Zip Windows .exe
+        run: |
+          cd ./downloaded-artifact/FontraPak-Windows
+          zip -r FontraPak-Windows.zip "Fontra Pak.exe"
 
       - name: Display structure of downloaded files
         run: ls -R

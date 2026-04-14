@@ -138,7 +138,7 @@ jobs:
 
       - name: Set dev version
         if: github.ref_type != 'tag'
-        run: echo "VERSION=0.0.1" >> $env:GITHUB_ENV
+        run: echo "VERSION=0.0.0" >> $env:GITHUB_ENV
 
       - name: Download Windows exe
         uses: actions/download-artifact@v8

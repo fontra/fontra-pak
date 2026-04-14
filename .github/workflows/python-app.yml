@@ -134,12 +134,10 @@ jobs:
 
       - name: Extract version from tag
         if: github.ref_type == 'tag'
-        shell: pwsh
         run: echo "VERSION=${{ github.ref_name }}" >> $env:GITHUB_ENV
 
       - name: Set dev version
         if: github.ref_type != 'tag'
-        shell: pwsh
         run: echo "VERSION=0.0.1" >> $env:GITHUB_ENV
 
       - name: Download Windows exe
@@ -149,15 +147,12 @@ jobs:
           path: dist
 
       - name: Install WiX v6
-        shell: pwsh
         run: dotnet tool install --global wix --version 6.0.2
 
       - name: Add WiX UI extension
-        shell: pwsh
         run: wix extension add --global WixToolset.UI.wixext/6.0.2
 
       - name: Compile MSI
-        shell: pwsh
         run: |
           Set-Location windows
           wix build Product.wxs -arch x64 -d "Version=${{ env.VERSION }}" -ext WixToolset.UI.wixext -o "$env:GITHUB_WORKSPACE\dist\FontraPak-Windows-Installer.msi"

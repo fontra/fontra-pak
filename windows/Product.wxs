@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- windows/Product.wxs -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" 
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package
       Name="Fontra Pak"
       Language="1033"
@@ -11,63 +11,49 @@
     <MajorUpgrade DowngradeErrorMessage="A newer version of Fontra Pak is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
+    <Property Id="INSTALLDESKTOPSHORTCUT" Secure="yes" />
+
     <Icon Id="AppIcon" SourceFile="..\icon\FontraIcon.ico" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
-    <Property Id="ARPHELPLINK" Value="https://fontra.xyz" />
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    <UI>
+      <DialogRef Id="InstallDirDlg" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2" />
+      
+      <Control Id="DesktopShortcutCheckBox" 
+               Type="CheckBox" 
+               X="20" Y="160" 
+               Width="200" Height="17" 
+               Property="INSTALLDESKTOPSHORTCUT" 
+               CheckBoxValue="1" 
+               Text="Create a desktop shortcut" />
+    </UI>
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="Fontra Pak">
         <Component Id="MainExecutable" Guid="B89F59EB-427A-4D98-B5E9-0E4415334903">
-          <File Id="FontraPakExe"
-                Source="..\dist\Fontra Pak.exe"
-                KeyPath="yes" />
+          <File Id="FontraPakExe" Source="..\dist\Fontra Pak.exe" KeyPath="yes" />
         </Component>
       </Directory>
     </StandardDirectory>
 
-    <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="AppMenuFolder" Name="Fontra Pak">
-        <Component Id="StartMenuShortcut" Guid="53433077-6B28-435E-AB3A-180CC64A9B4D">
-          <Shortcut Id="StartMenuShortcut"
-                    Name="Fontra Pak"
-                    Description="Fontra Pak font editor"
-                    Target="[INSTALLFOLDER]Fontra Pak.exe"
-                    WorkingDirectory="INSTALLFOLDER" />
-          <RemoveFolder Id="AppMenuFolderRemove" On="uninstall" />
-          <RegistryValue Root="HKLM"
-                         Key="Software\Fontra Pak"
-                         Name="StartMenuShortcut"
-                         Type="integer"
-                         Value="1"
-                         KeyPath="yes" />
-        </Component>
-      </Directory>
-    </StandardDirectory>
-
-    <!-- This needs to be opt-in
     <StandardDirectory Id="DesktopFolder">
-      <Component Id="DesktopShortcut" Guid="F61FDE49-7169-40DA-98B6-B3B3436FB807">
+      <Component Id="DesktopShortcutComponent" 
+                 Guid="F61FDE49-7169-40DA-98B6-B3B3436FB807"
+                 Condition='INSTALLDESKTOPSHORTCUT = "1"'>
         <Shortcut Id="DesktopShortcut"
                   Name="Fontra Pak"
-                  Description="Fontra Pak font editor"
                   Target="[INSTALLFOLDER]Fontra Pak.exe"
                   WorkingDirectory="INSTALLFOLDER" />
-        <RegistryValue Root="HKLM"
-                       Key="Software\Fontra Pak"
-                       Name="DesktopShortcut"
-                       Type="integer"
-                       Value="1"
-                       KeyPath="yes" />
+        <RegistryValue Root="HKCU" Key="Software\Fontra Pak" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </StandardDirectory>
-    -->
 
     <Feature Id="MainFeature" Title="Fontra Pak" Level="1">
       <ComponentRef Id="MainExecutable" />
-      <ComponentRef Id="StartMenuShortcut" />
-      <!-- see above, this needs to be opt-in
-      <ComponentRef Id="DesktopShortcut" />
-      -->
+      <ComponentRef Id="DesktopShortcutComponent" />
     </Feature>
   </Package>
 </Wix>

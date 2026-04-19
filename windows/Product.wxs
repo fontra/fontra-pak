@@ -21,6 +21,9 @@
 
     <UI>
       <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="CustomInstallDirDlg" Order="2" />
+      <Publish Dialog="CustomInstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" />
+      <Publish Dialog="CustomInstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1" />
+      <Publish Dialog="CustomInstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2" />
       <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomInstallDirDlg" Order="2" />
     </UI>
 

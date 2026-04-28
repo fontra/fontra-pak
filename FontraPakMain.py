@@ -93,10 +93,15 @@ fileTypes = [
     ("Fontra", "fontra"),
     ("Designspace", "designspace"),
     ("Unified Font Object", "ufo"),
+    ("RoboCJK", "rcjk"),
 ]
 
 fileTypesMapping = {
     f"{name} (*.{extension})": f".{extension}" for name, extension in fileTypes
+}
+
+fileTypesMappingForNewFont = {
+    key: value for key, value in fileTypesMapping.items() if "rcjk" not in value
 }
 
 exportFileTypes = [
@@ -263,14 +268,14 @@ class FontraMainWidget(QMainWindow):
             self,
             "New Font...",
             os.path.join(self.activeFolder, "Untitled"),
-            ";;".join(fileTypesMapping),
+            ";;".join(fileTypesMappingForNewFont),
         )
 
         if not fontPath:
             # User cancelled
             return
 
-        fontPath = getFontPath(fontPath, fileType, fileTypesMapping)
+        fontPath = getFontPath(fontPath, fileType, fileTypesMappingForNewFont)
 
         applicationSettings.setValue("activeFolder", os.path.dirname(fontPath))
 

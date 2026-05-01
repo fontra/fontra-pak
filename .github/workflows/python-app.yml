@@ -201,7 +201,7 @@ jobs:
           python scripts/extract_latest_changes.py > tmp_latest_changes.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: false
           body_path: 'tmp_latest_changes.txt'

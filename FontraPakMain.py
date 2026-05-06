@@ -40,6 +40,7 @@ from PyQt6.QtCore import (
 )
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QFileDialog,
     QGridLayout,
     QLabel,
@@ -185,6 +186,17 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(self.label, 1, 0, 1, 2)
 
+        readOnlyCheckBox = QCheckBox("Open fonts in read-only mode")
+        readOnlyCheckBox.setCheckState(
+            Qt.CheckState.Checked
+            if applicationSettings.value("openFontsInReadOnlyMode", False)
+            else Qt.CheckState.Unchecked
+        )
+        readOnlyCheckBox.stateChanged.connect(
+            lambda s: applicationSettings.setValue("openFontsInReadOnlyMode", bool(s))
+        )
+        layout.addWidget(readOnlyCheckBox, 2, 0)
+
         self.sampleTextBox = QPlainTextEdit(
             applicationSettings.value("editorSampleText", ""), self
         )
@@ -199,10 +211,10 @@ class FontraMainWidget(QMainWindow):
                 "editorSampleText", self.sampleTextBox.toPlainText()
             )
         )
-        layout.addWidget(QLabel("Sample text:"), 2, 0)
-        layout.addWidget(self.sampleTextBox, 3, 0, 1, 2)
+        layout.addWidget(QLabel("Sample text:"), 3, 0)
+        layout.addWidget(self.sampleTextBox, 4, 0, 1, 2)
 
-        layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 4, 0)
+        layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 5, 0)
 
         if sys.platform in {"darwin", "win32", "linux"}:
             self.downloadButton = QPushButton("Download latest Fontra Pak", self)
@@ -211,7 +223,7 @@ class FontraMainWidget(QMainWindow):
             )
             self.downloadButton.clicked.connect(self.goToLatestDownload)
             layout.addWidget(
-                self.downloadButton, 4, 1, alignment=Qt.AlignmentFlag.AlignRight
+                self.downloadButton, 5, 1, alignment=Qt.AlignmentFlag.AlignRight
             )
             if "test-startup" not in sys.argv:
                 self.checkForUpdate(1500)
@@ -545,11 +557,15 @@ def openFile(path, port):
         del parts[0]
     path = "/".join(quote(part, safe="") for part in parts)
 
+    readOnly = applicationSettings.value("openFontsInReadOnlyMode", False)
     sampleText = applicationSettings.value("editorSampleText", "")
     urlFragment = dumpURLFragment({"text": sampleText}) if sampleText else ""
     view = "editor" if sampleText else "fontoverview"
 
-    webbrowser.open(f"http://localhost:{port}/{view}.html?project={path}{urlFragment}")
+    readOnlyStr = "&read-only=true" if readOnly else ""
+    webbrowser.open(
+        f"http://localhost:{port}/{view}.html?project={path}{readOnlyStr}{urlFragment}"
+    )
 
 
 def showMessageDialog(

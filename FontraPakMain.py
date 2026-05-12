@@ -189,7 +189,7 @@ class FontraMainWidget(QMainWindow):
         readOnlyCheckBox = QCheckBox("Open fonts in read-only mode")
         readOnlyCheckBox.setCheckState(
             Qt.CheckState.Checked
-            if applicationSettings.value("openFontsInReadOnlyMode", False)
+            if applicationSettings.value("openFontsInReadOnlyMode", False, type=bool)
             else Qt.CheckState.Unchecked
         )
         readOnlyCheckBox.stateChanged.connect(
@@ -557,7 +557,7 @@ def openFile(path, port):
         del parts[0]
     path = "/".join(quote(part, safe="") for part in parts)
 
-    readOnly = applicationSettings.value("openFontsInReadOnlyMode", False)
+    readOnly = applicationSettings.value("openFontsInReadOnlyMode", False, type=bool)
     sampleText = applicationSettings.value("editorSampleText", "")
     urlFragment = dumpURLFragment({"text": sampleText}) if sampleText else ""
     view = "editor" if sampleText else "fontoverview"

@@ -18,6 +18,7 @@ from random import random
 from urllib.parse import quote
 from urllib.request import urlopen
 
+import certifi
 import psutil
 from fontra import __version__ as fontraVersion
 from fontra.backends import getFileSystemBackend, newFileSystemBackend
@@ -681,6 +682,8 @@ def queueGetter(queue, callback):
 
 
 def main():
+    os.environ["SSL_CERT_FILE"] = certifi.where()
+
     queue = multiprocessing.Queue()
     host = "localhost"
     port = findFreeTCPPort(host=host)

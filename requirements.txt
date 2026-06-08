@@ -8,3 +8,4 @@ PyQt6==6.7.1
 PyQt6-Qt6==6.7.3
 PyQt6-sip==13.10.3
 psutil==7.2.2
+certifi==2026.5.20

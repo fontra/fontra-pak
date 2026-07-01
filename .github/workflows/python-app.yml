@@ -44,7 +44,7 @@ jobs:
           # security find-identity -v -p codesigning
 
       - name: Git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -130,7 +130,7 @@ jobs:
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Extract version from tag
         if: github.ref_type == 'tag'
@@ -175,7 +175,7 @@ jobs:
     steps:
 
       - name: Git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v6

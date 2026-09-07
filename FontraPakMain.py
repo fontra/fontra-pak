@@ -2,6 +2,9 @@ import os
 import sys
 
 if sys.platform == "linux" and "QT_QPA_PLATFORM" not in os.environ:
+    # GNOME/Mutter does not support Wayland server-side decorations (SSD),
+    # rendering Qt windows without titlebar buttons. Force XCB on GNOME to
+    # restore window controls via Xwayland.
     desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
     if "gnome" in desktop or "mutter" in desktop:
         os.environ["QT_QPA_PLATFORM"] = "xcb"

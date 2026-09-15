@@ -473,16 +473,16 @@ def _fetchLatestReleaseInfo() -> tuple[str, str | None]:
         case "win32":
             assetNamePart = "Windows-Installer"
         case "linux":
-            assetNamePart = "Linux"
+            assetNamePart = "Ubuntu"
 
     if assetNamePart is None:
         return latestVersion, None
 
-    [assetInfo] = [
+    assetInfos = [
         asset for asset in latestRelease["assets"] if assetNamePart in asset["name"]
     ]
 
-    return latestVersion, assetInfo["browser_download_url"]
+    return latestVersion, assetInfos[0]["browser_download_url"] if assetInfos else None
 
 
 def exportFontToPath(sourcePath, destPath, fileExtension, logFilePath):

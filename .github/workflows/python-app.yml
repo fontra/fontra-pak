@@ -52,10 +52,10 @@ jobs:
           node-version: 20.x
           cache: "npm"
 
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Patch requirements.txt
         if: github.ref_type == 'tag'

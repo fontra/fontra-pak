@@ -10,13 +10,13 @@ For Linux, there are more options, such as `flatpak` and `snap`: https://docs.fo
 
 ## Run locally from source
 
-To run the main program directly, set up a Python 3.10 (or higher) virtual environment, install the requirements from `requirements.txt`, then run:
+To run the main program directly, set up a Python 3.11 (or higher) virtual environment, install the requirements from `requirements.txt`, then run:
 
     python FontraPakMain.py
 
 ## Build a self-contained application locally
 
-To build a self-contained application, set up a Python 3.10 (or higher) virtual environment, install the requirements from `requirements.txt` and `requirements-dev.txt`, then run:
+To build a self-contained application, set up a Python 3.11 (or higher) virtual environment, install the requirements from `requirements.txt` and `requirements-dev.txt`, then run:
 
     pyinstaller FontraPak.spec -y
 

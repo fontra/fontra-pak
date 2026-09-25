@@ -149,6 +149,7 @@ if sys.platform == "darwin":
                         "glyphspackage",
                         "fontra",
                         "rcjk",
+                        "yaml",
                     ],
                     CFBundleTypeRole="Editor",
                 ),

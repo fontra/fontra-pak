@@ -122,6 +122,12 @@ exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
 
 
+def runningAsFlatpak() -> bool:
+    # Every Flatpak sandbox bind-mounts this file in, regardless of app ID.
+    # More reliable than checking the FLATPAK_ID env var, which can be unset.
+    return os.path.exists("/.flatpak-info")
+
+
 applicationSettings = QSettings("xyz.fontra", "FontraPak")
 
 
@@ -217,7 +223,7 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 5, 0)
 
-        if sys.platform in {"darwin", "win32", "linux"}:
+        if sys.platform in {"darwin", "win32", "linux"} and not runningAsFlatpak():
             self.downloadButton = QPushButton("Download latest Fontra Pak", self)
             self.downloadButton.setSizePolicy(
                 QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed

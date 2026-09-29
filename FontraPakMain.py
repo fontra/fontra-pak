@@ -27,10 +27,11 @@ from fontra.backends.populate import createNewFontAndPopulate
 from fontra.core.classes import DiscreteFontAxis
 from fontra.core.server import FontraServer, findFreeTCPPort
 from fontra.core.urlfragment import dumpURLFragment
-from fontra.filesystem.projectmanager import FileSystemProjectManager
+from fontra.filesystem.projectmanager import FileSystemProjectManager, fileExtensions
 from fontTools.ttLib.woff2 import compress as woff2Compress
 from PyQt6.QtCore import (
     QEvent,
+    QFileInfo,
     QObject,
     QPoint,
     QSettings,
@@ -42,8 +43,11 @@ from PyQt6.QtCore import (
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QDialog,
     QFileDialog,
+    QFileIconProvider,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QMainWindow,
     QMessageBox,
@@ -119,6 +123,8 @@ exportFileTypesMapping = {
 
 exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 
+openFontFilter = f"Fonts ({' '.join(f'*{ext}' for ext in sorted(fileExtensions))})"
+
 latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
 
 
@@ -146,6 +152,63 @@ def getFontPath(path, fileType, mapping):
         path += extension
 
     return path
+
+
+def isFontPath(path):
+    path = pathlib.Path(path)
+    return path.suffix.lower() in fileExtensions and path.exists()
+
+
+def isFontFolder(info):
+    return info.isDir() and isFontPath(info.filePath())
+
+
+class FontFolderIconProvider(QFileIconProvider):
+    """Show font folders as documents rather than as folders"""
+
+    def icon(self, info):
+        if isinstance(info, QFileInfo) and isFontFolder(info):
+            info = QFileIconProvider.IconType.File
+        return super().icon(info)
+
+    def type(self, info):
+        return "Font Folder" if isFontFolder(info) else super().type(info)
+
+
+class OpenFontDialog(QFileDialog):
+    # Must outlive the file system models of all Open dialogs
+    fontFolderIconProvider = FontFolderIconProvider()
+
+    def __init__(self, parent, folder):
+        super().__init__(parent, "Open Font...", folder, openFontFilter)
+        if sys.platform != "darwin":
+            # The native dialog on macOS can select files and folders. On other
+            # platforms, it can select either files or folders, but not both.
+            # So we use non-native dialog with a custom icon provider and
+            # handle directoryEntered ourselves.
+            self.setOption(QFileDialog.Option.DontUseNativeDialog)
+            self.setFileMode(QFileDialog.FileMode.ExistingFile)
+            self.setIconProvider(self.fontFolderIconProvider)
+            self.directoryEntered.connect(self.folderWasEntered)
+        self.setOption(QFileDialog.Option.ReadOnly)
+        self.fontPaths = []
+
+    def accept(self):
+        paths = self.selectedFiles()
+        missing = not all(os.path.exists(p) for p in paths)
+        onlyFolders = all(os.path.isdir(p) and not isFontPath(p) for p in paths)
+        if sys.platform != "darwin" and (missing or onlyFolders):
+            super().accept()
+        else:
+            self.acceptPaths(paths)
+
+    def folderWasEntered(self, path):
+        if isFontPath(path):
+            self.acceptPaths([path])
+
+    def acceptPaths(self, paths):
+        self.fontPaths = paths
+        self.done(QDialog.DialogCode.Accepted)
 
 
 class FontraMainWidget(QMainWindow):
@@ -177,12 +240,20 @@ class FontraMainWidget(QMainWindow):
         button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         button.clicked.connect(self.newFont)
 
+        buttonOpen = QPushButton("&Open...", self)
+        buttonOpen.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        buttonOpen.clicked.connect(self.openFont)
+
+        buttonsLayout = QHBoxLayout()
+        buttonsLayout.addWidget(button)
+        buttonsLayout.addWidget(buttonOpen)
+
         buttonDocs = QPushButton("Documentation", self)
         buttonDocs.setToolTip("Open documentation website")
         buttonDocs.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         buttonDocs.clicked.connect(lambda: webbrowser.open("https://docs.fontra.xyz"))
 
-        layout.addWidget(button, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout.addLayout(buttonsLayout, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(buttonDocs, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
 
         layout.addWidget(self.label, 1, 0, 1, 2)
@@ -300,6 +371,25 @@ class FontraMainWidget(QMainWindow):
             return
 
         if os.path.exists(fontPath):
+            openFile(fontPath, self.port)
+
+    def openFont(self):
+        dialog = OpenFontDialog(self, self.activeFolder)
+        paths = dialog.fontPaths if dialog.exec() else []
+
+        fontPaths = [pathlib.Path(p) for p in paths if isFontPath(p)]
+        notFonts = [f"“{pathlib.Path(p).name}”" for p in paths if not isFontPath(p)]
+
+        if notFonts:
+            showMessageDialog(
+                "Cannot open " + ", ".join(notFonts),
+                "Not a font, or not a supported font format",
+            )
+
+        if fontPaths:
+            applicationSettings.setValue("activeFolder", str(fontPaths[0].parent))
+
+        for fontPath in fontPaths:
             openFile(fontPath, self.port)
 
     def messageFromServer(self, item):

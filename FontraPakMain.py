@@ -11,7 +11,7 @@ import tempfile
 import threading
 import traceback
 import webbrowser
-from contextlib import aclosing
+from contextlib import aclosing, contextmanager
 from dataclasses import dataclass
 from datetime import datetime
 from random import random
@@ -128,6 +128,39 @@ def runningAsFlatpak() -> bool:
     return os.path.exists("/.flatpak-info")
 
 
+@contextmanager
+def systemLibraryEnv():
+    # Child processes (xdg-open, kde-open, ...) must not see the bundle's
+    # library and Qt plugin paths, or they will load our bundled Qt.
+    bundleDir = getattr(sys, "_MEIPASS", None)
+    if not (bundleDir and sys.platform == "linux"):
+        yield
+        return
+
+    saved = {}
+    for key, value in list(os.environ.items()):
+        if bundleDir not in value or key.startswith("_PYI"):
+            continue
+        saved[key] = value
+        if key == "LD_LIBRARY_PATH" and "LD_LIBRARY_PATH_ORIG" in os.environ:
+            os.environ[key] = os.environ["LD_LIBRARY_PATH_ORIG"]
+            continue
+        parts = [p for p in value.split(os.pathsep) if bundleDir not in p]
+        if parts:
+            os.environ[key] = os.pathsep.join(parts)
+        else:
+            del os.environ[key]
+    try:
+        yield
+    finally:
+        os.environ.update(saved)
+
+
+def openURL(url):
+    with systemLibraryEnv():
+        return webbrowser.open(url)
+
+
 applicationSettings = QSettings("xyz.fontra", "FontraPak")
 
 
@@ -186,7 +219,7 @@ class FontraMainWidget(QMainWindow):
         buttonDocs = QPushButton("Documentation", self)
         buttonDocs.setToolTip("Open documentation website")
         buttonDocs.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        buttonDocs.clicked.connect(lambda: webbrowser.open("https://docs.fontra.xyz"))
+        buttonDocs.clicked.connect(lambda: openURL("https://docs.fontra.xyz"))
 
         layout.addWidget(button, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(buttonDocs, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
@@ -444,7 +477,7 @@ class FontraMainWidget(QMainWindow):
         if downloadURL is None:
             downloadURL = latestReleasePageURL
 
-        webbrowser.open(downloadURL)
+        openURL(downloadURL)
 
 
 def fetchLatestReleaseInfo() -> tuple[str, str | None]:
@@ -563,7 +596,7 @@ def openFile(path, port):
     view = "editor" if sampleText else "fontoverview"
 
     readOnlyStr = "&read-only=true" if readOnly else ""
-    webbrowser.open(
+    openURL(
         f"http://localhost:{port}/{view}.html?project={path}{readOnlyStr}{urlFragment}"
     )
 

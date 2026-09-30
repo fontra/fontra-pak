@@ -97,6 +97,93 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
+
+if sys.platform.startswith("linux"):
+    # Matched as filename PREFIXES. The ".so" in each entry is deliberate: it keeps
+    # wheel-vendored, hash-suffixed names such as libzstd-44be1190.so.1.5.7 or
+    # libjpeg-31e2ca52.so.62.4.0 from being caught, since the wheels' extension
+    # modules link against exactly those names.
+    SYSTEM_LIB_PREFIXES = (
+        # -- C++ / compiler runtime: must match the host's Mesa and GL drivers
+        "libstdc++.so",
+        "libgcc_s.so",
+        # -- GLib family: GIO/GTK modules on the host need the host's glib
+        "libglib-2.0.so",
+        "libgobject-2.0.so",
+        "libgio-2.0.so",
+        "libgmodule-2.0.so",
+        "libgthread-2.0.so",
+        # -- GTK3 stack (pulled in by Qt's libqgtk3.so platform theme)
+        "libgtk-3.so",
+        "libgdk-3.so",
+        "libgdk_pixbuf-2.0.so",
+        "libatk-1.0.so",
+        "libatk-bridge-2.0.so",
+        "libatspi.so",
+        "libepoxy.so",
+        # -- Text and drawing: must match host fontconfig config syntax
+        "libfontconfig.so",
+        "libfreetype.so",
+        "libcairo.so",
+        "libcairo-gobject.so",
+        "libpango-1.0.so",
+        "libpangocairo-1.0.so",
+        "libpangoft2-1.0.so",
+        "libharfbuzz.so",
+        "libfribidi.so",
+        "libgraphite2.so",
+        "libthai.so",
+        "libdatrie.so",
+        "libpixman-1.so",
+        "libexpat.so",
+        "libbrotlicommon.so",
+        "libbrotlidec.so",
+        # -- Low-level libs that glib/gio need at a newer version than 22.04 has
+        #    (libmount was the cause of "MOUNT_2_40 not found" and of the GTK
+        #    file picker silently falling back to Qt's own dialog)
+        "libmount.so",
+        "libblkid.so",
+        "libuuid.so",
+        "libselinux.so",
+        "libpcre2-8.so",
+        "libsystemd.so",
+        "libcap.so",
+        "libgcrypt.so",
+        "libgpg-error.so",
+        "libdbus-1.so",
+        "libbsd.so",
+        "libmd.so",
+        # -- Kerberos chain (dependency of the GIO/GTK stack)
+        "libgssapi_krb5.so",
+        "libkrb5.so",
+        "libkrb5support.so",
+        "libk5crypto.so",
+        "libkeyutils.so",
+        "libcom_err.so",
+        # -- Keyboard: an old libxkbcommon cannot parse newer Compose files
+        #    (the "unrecognized keysym dead_hamza" errors). Prefix covers
+        #    libxkbcommon-x11 as well.
+        "libxkbcommon",
+    )
+
+    # Deliberately NOT excluded (keep bundled):
+    #   - libQt6*, libpython3.*, libicu*.73: Qt and Python need their own, and
+    #     Fedora ships a different ICU soname
+    #   - libjpeg.so.8, libpcre.so.3: newer distros ship different sonames
+    #   - hash-suffixed wheel libs (libavif-*, libwebp-*, libtiff-*, ...)
+    #   - ABI-stable basics (libz, libpng16, liblz4, libzstd.so.1, libffi, libX11,
+    #     libxcb-*): low risk; revisit only if errors point at them
+
+    _before = {b[0] for b in a.binaries}
+    a.binaries = [
+        b for b in a.binaries
+        if not os.path.basename(b[0]).startswith(SYSTEM_LIB_PREFIXES)
+    ]
+    _removed = sorted(_before - {b[0] for b in a.binaries})
+    print(f"[spec] excluded {len(_removed)} system libraries from the bundle:")
+    for _name in _removed:
+        print(f"[spec]   {_name}")
+
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 if sys.platform == "darwin":

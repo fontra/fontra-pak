@@ -40,6 +40,7 @@ from PyQt6.QtCore import (
     QTimer,
     pyqtSignal,
 )
+from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -242,16 +243,18 @@ class FontraMainWidget(QMainWindow):
         # Helpful: https://www.pythontutorial.net/pyqt/pyqt-qgridlayout/
         layout = QGridLayout()
 
-        button = QPushButton("&New Font...", self)
-        button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        button.clicked.connect(self.newFont)
+        buttonNew = QPushButton("&New Font...", self)
+        buttonNew.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        buttonNew.clicked.connect(self.newFont)
+        buttonNew.setShortcut(QKeySequence("Ctrl+N"))
 
         buttonOpen = QPushButton("&Open Font...", self)
         buttonOpen.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         buttonOpen.clicked.connect(self.openFont)
+        buttonOpen.setShortcut(QKeySequence("Ctrl+O"))
 
         buttonsLayout = QHBoxLayout()
-        buttonsLayout.addWidget(button)
+        buttonsLayout.addWidget(buttonNew)
         buttonsLayout.addWidget(buttonOpen)
 
         buttonDocs = QPushButton("Documentation", self)

@@ -246,7 +246,7 @@ class FontraMainWidget(QMainWindow):
         button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         button.clicked.connect(self.newFont)
 
-        buttonOpen = QPushButton("&Open...", self)
+        buttonOpen = QPushButton("&Open Font...", self)
         buttonOpen.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         buttonOpen.clicked.connect(self.openFont)
 

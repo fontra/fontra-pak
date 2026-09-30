@@ -22,6 +22,6 @@ To build a self-contained application, set up a Python 3.11 (or higher) virtual 
 
 ## How it works
 
-Drop a font file onto application icon, or launch the application, and drop a font file onto the drop area or use the "Open..." button to choose one. Or use the "New font" button to create a new font.
+Drop a font file onto application icon, or launch the application, and drop a font file onto the drop area or use the "Open File..." button to choose one. Or use the "New font..." button to create a new font.
 
 https://github.com/fontra/fontra-pak/assets/4246121/a4e8054e-995a-4bcc-ac64-5c8a0ea415aa

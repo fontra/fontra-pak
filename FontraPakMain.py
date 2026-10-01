@@ -85,14 +85,17 @@ border: 5px solid gray;
 mainText = """
 <span style="font-size: 40px;">Drop font files here</span>
 <br>
+<span style="font-size: 18px;">or double-click to browse</span>
 <br>
-Your fonts will stay on your computer and will not be uploaded anywhere.
+<br>
+Your fonts stay on your computer and are never uploaded anywhere.
 <br>
 <br>
-Fontra Pak reads and writes .ufo, .designspace, .fontra, and .rcjk, and has
-partial support for reading and writing .glyphs and .glyphspackage files.
+<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk
 <br>
-Additionally, it can read (but not write) .ttf, .otf, .woff, .woff2, and .ttx.
+<b>Partial read and write:</b> .glyphs, .glyphspackage
+<br>
+<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx
 """
 
 fileTypes = [

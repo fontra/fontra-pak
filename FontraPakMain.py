@@ -135,6 +135,25 @@ def runningAsFlatpak() -> bool:
     return os.path.exists("/.flatpak-info")
 
 
+def openURL(url):
+    if sys.platform != "linux":
+        return webbrowser.open(url)
+
+    # PyInstaller points these at the bundle; xdg-open & co must not see them.
+    names = ("LD_LIBRARY_PATH", "QT_PLUGIN_PATH", "QML2_IMPORT_PATH")
+    saved = {name: os.environ.pop(name, None) for name in names}
+    if saved["LD_LIBRARY_PATH"] is not None and "LD_LIBRARY_PATH_ORIG" in os.environ:
+        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH_ORIG"]
+    try:
+        return webbrowser.open(url)
+    finally:
+        for name, value in saved.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+
+
 applicationSettings = QSettings("xyz.fontra", "FontraPak")
 
 
@@ -269,7 +288,7 @@ class FontraMainWidget(QMainWindow):
         buttonDocs = QPushButton("Documentation", self)
         buttonDocs.setToolTip("Open documentation website")
         buttonDocs.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        buttonDocs.clicked.connect(lambda: webbrowser.open("https://docs.fontra.xyz"))
+        buttonDocs.clicked.connect(lambda: openURL("https://docs.fontra.xyz"))
 
         layout.addLayout(buttonsLayout, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(buttonDocs, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
@@ -546,7 +565,7 @@ class FontraMainWidget(QMainWindow):
         if downloadURL is None:
             downloadURL = latestReleasePageURL
 
-        webbrowser.open(downloadURL)
+        openURL(downloadURL)
 
 
 def fetchLatestReleaseInfo() -> tuple[str, str | None]:
@@ -665,7 +684,7 @@ def openFile(path, port):
     view = "editor" if sampleText else "fontoverview"
 
     readOnlyStr = "&read-only=true" if readOnly else ""
-    webbrowser.open(
+    openURL(
         f"http://localhost:{port}/{view}.html?project={path}{readOnlyStr}{urlFragment}"
     )
 

@@ -237,6 +237,15 @@ class OpenFontDialog(QFileDialog):
         self.done(QDialog.DialogCode.Accepted)
 
 
+class DropAreaLabel(QLabel):
+    doubleClicked = pyqtSignal()
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.doubleClicked.emit()
+        super().mouseDoubleClickEvent(event)
+
+
 class FontraMainWidget(QMainWindow):
     def __init__(self, port):
         super().__init__()
@@ -262,7 +271,8 @@ class FontraMainWidget(QMainWindow):
 
         self.setAcceptDrops(True)
 
-        self.label = QLabel(mainText)
+        self.label = DropAreaLabel(mainText)
+        self.label.doubleClicked.connect(self.openFont)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setStyleSheet(neutralCSS)
         self.label.setSizePolicy(

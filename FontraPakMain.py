@@ -85,14 +85,17 @@ border: 5px solid gray;
 mainText = """
 <span style="font-size: 40px;">Drop font files here</span>
 <br>
+or double-click to browse
 <br>
-Your fonts will stay on your computer and will not be uploaded anywhere.
+<br>
+Your fonts stay on your computer and are never uploaded anywhere.
 <br>
 <br>
-Fontra Pak reads and writes .ufo, .designspace, .fontra, and .rcjk, and has
-partial support for reading and writing .glyphs and .glyphspackage files.
+<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk
 <br>
-Additionally, it can read (but not write) .ttf, .otf, .woff, .woff2, and .ttx.
+<b>Partial read and write:</b> .glyphs, .glyphspackage
+<br>
+<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx
 """
 
 fileTypes = [
@@ -237,6 +240,15 @@ class OpenFontDialog(QFileDialog):
         self.done(QDialog.DialogCode.Accepted)
 
 
+class DropAreaLabel(QLabel):
+    doubleClicked = pyqtSignal()
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.doubleClicked.emit()
+        super().mouseDoubleClickEvent(event)
+
+
 class FontraMainWidget(QMainWindow):
     def __init__(self, port):
         super().__init__()
@@ -262,7 +274,8 @@ class FontraMainWidget(QMainWindow):
 
         self.setAcceptDrops(True)
 
-        self.label = QLabel(mainText)
+        self.label = DropAreaLabel(mainText)
+        self.label.doubleClicked.connect(self.openFont)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setStyleSheet(neutralCSS)
         self.label.setSizePolicy(

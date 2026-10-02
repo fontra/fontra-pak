@@ -85,7 +85,7 @@ border: 5px solid gray;
 mainText = """
 <span style="font-size: 40px;">Drop font files here</span>
 <br>
-<span style="font-size: 18px;">or double-click to browse</span>
+or double-click to browse
 <br>
 <br>
 Your fonts stay on your computer and are never uploaded anywhere.

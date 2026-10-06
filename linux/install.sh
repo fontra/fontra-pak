@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_ID="xyz.fontra.FontraPak"
+APP_ID="xyz.fontra.FontraPak.Native"
 APP_NAME="Fontra Pak"
 
 PREFIX="${PREFIX:-$HOME/.local}"
@@ -63,7 +63,7 @@ echo "==> Installing desktop entry"
 
 cat > "${DESKTOP_DIR}/${APP_ID}.desktop" <<EOF
 [Desktop Entry]
-Name=${APP_NAME}
+Name=${APP_NAME} (Native)
 Comment=Font editor and design application
 Exec=${BIN_DIR}/fontrapak %F
 Icon=${APP_ID}

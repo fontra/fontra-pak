@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_ID="xyz.fontra.FontraPak"
+APP_ID="xyz.fontra.FontraPak.Native"
 
 PREFIX="${PREFIX:-$HOME/.local}"
 APP_DIR="${PREFIX}/lib/fontrapak"

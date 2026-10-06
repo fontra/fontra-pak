@@ -14,6 +14,28 @@ To run the main program directly, set up a Python 3.11 (or higher) virtual envir
 
     python FontraPakMain.py
 
+## Native Linux installation
+
+Fontra Pak can also be run directly from its Python environment on Linux.
+
+This avoids the self-contained PyInstaller bundle and uses the libraries provided by the host system, including the host Qt, Wayland/X11, fontconfig and graphics stack.
+
+To install for the current user:
+
+    ./linux/install.sh
+
+The default installation prefix is `~/.local`.
+
+The launcher is installed as:
+
+    ~/.local/bin/fontrapak
+
+A desktop entry is also installed for the graphical desktop environment.
+
+To uninstall:
+
+    ./linux/uninstall.sh
+
 ## Build a self-contained application locally
 
 To build a self-contained application, set up a Python 3.11 (or higher) virtual environment, install the requirements from `requirements.txt` and `requirements-dev.txt`, then run:

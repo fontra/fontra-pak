@@ -814,6 +814,15 @@ def queueGetter(queue, callback):
         callInMainThread(callback, item)
 
 
+def openPathsFromArguments(args, port):
+    """Open fonts passed on the command line (e.g. from a file manager)."""
+    for arg in args:
+        if arg.startswith("-"):
+            continue
+        if isFontPath(arg):
+            openFile(arg, port)
+
+
 def main():
     os.environ["SSL_CERT_FILE"] = certifi.where()
 
@@ -844,6 +853,9 @@ def main():
     thread = callInNewThread(queueGetter, queue, mainWindow.messageFromServer)
 
     mainWindow.show()
+
+    # app.arguments()[0] is the program name; Qt has already removed its own options
+    QTimer.singleShot(0, lambda: openPathsFromArguments(app.arguments()[1:], port))
 
     if "test-startup" in sys.argv:
 

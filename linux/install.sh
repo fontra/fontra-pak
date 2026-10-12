@@ -9,6 +9,7 @@ APP_DIR="${PREFIX}/lib/fontrapak"
 BIN_DIR="${PREFIX}/bin"
 DESKTOP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 ICON_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/scalable/apps"
+MIME_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/mime"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
@@ -31,7 +32,7 @@ if ! "$PYTHON" -c 'import sys; raise SystemExit(sys.version_info < (3, 11))'; th
     exit 1
 fi
 
-mkdir -p "$APP_DIR" "$BIN_DIR" "$DESKTOP_DIR" "$ICON_DIR"
+mkdir -p "$APP_DIR" "$BIN_DIR" "$DESKTOP_DIR" "$ICON_DIR" "${MIME_DIR}/packages"
 
 if [[ ! -d "${APP_DIR}/venv" ]]; then
     echo "==> Creating virtual environment"
@@ -70,10 +71,20 @@ Icon=${APP_ID}
 Terminal=false
 Type=Application
 Categories=Graphics;Development;
-MimeType=
+MimeType=font/ttf;font/otf;font/woff;font/woff2;application/x-designspace+xml;application/x-glyphs;
 StartupNotify=true
 StartupWMClass=fontrapak
 EOF
+
+echo "==> Installing MIME types"
+
+install -m 0644 \
+    "${SCRIPT_DIR}/${APP_ID}.xml" \
+    "${MIME_DIR}/packages/${APP_ID}.xml"
+
+if command -v update-mime-database >/dev/null 2>&1; then
+    update-mime-database "$MIME_DIR" || true
+fi
 
 echo "==> Installing icon"
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-designspace+xml">
+    <comment>Designspace document</comment>
+    <sub-class-of type="application/xml"/>
+    <glob pattern="*.designspace"/>
+  </mime-type>
+  <mime-type type="application/x-glyphs">
+    <comment>Glyphs source file</comment>
+    <sub-class-of type="text/plain"/>
+    <glob pattern="*.glyphs"/>
+  </mime-type>
+</mime-info>

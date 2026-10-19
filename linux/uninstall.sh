@@ -8,6 +8,7 @@ APP_DIR="${PREFIX}/lib/fontrapak"
 BIN_DIR="${PREFIX}/bin"
 DESKTOP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 ICON_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/scalable/apps"
+MIME_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/mime"
 
 echo "==> Removing Fontra Pak"
 
@@ -15,6 +16,11 @@ rm -rf "${APP_DIR}"
 rm -f "${BIN_DIR}/fontrapak"
 rm -f "${DESKTOP_DIR}/${APP_ID}.desktop"
 rm -f "${ICON_DIR}/${APP_ID}.svg"
+rm -f "${MIME_DIR}/packages/${APP_ID}.xml"
+
+if command -v update-mime-database >/dev/null 2>&1; then
+    update-mime-database "$MIME_DIR" || true
+fi
 
 if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database "$DESKTOP_DIR" || true

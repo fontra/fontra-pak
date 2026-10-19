@@ -817,8 +817,6 @@ def queueGetter(queue, callback):
 def openPathsFromArguments(args, port):
     """Open fonts passed on the command line (e.g. from a file manager)."""
     for arg in args:
-        if arg.startswith("-"):
-            continue
         if isFontPath(arg):
             openFile(arg, port)
 

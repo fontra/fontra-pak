@@ -907,7 +907,7 @@ def main():
     app = FontraApplication(sys.argv, port)
 
     # macOS already hands files to the running instance itself
-    singleInstance = sys.platform != "darwin"
+    singleInstance = sys.platform != "darwin" and "--new-instance" not in sys.argv
     paths = getFontPathsFromArguments(app.arguments()[1:])
     instanceRunning = singleInstance and connectToRunningInstance(paths)
 

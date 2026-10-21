@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import json
 import logging
 import multiprocessing
@@ -822,22 +823,32 @@ def openPathsFromArguments(args, port):
             openFile(arg, port)
 
 
-singleInstanceName = "xyz.fontra.FontraPak"
+def getSingleInstanceName():
+    # A different copy of the app (another install, a frozen build, a source
+    # checkout) gets its own name, so copies never hand files to each other.
+    appPath = sys.executable if getattr(sys, "frozen", False) else __file__
+    digest = hashlib.sha256(os.path.realpath(appPath).encode("utf-8")).hexdigest()
+    return f"xyz.fontra.FontraPak.{digest[:12]}"
+
+
+singleInstanceName = getSingleInstanceName()
 
 
 def getFontPathsFromArguments(args):
     return [str(pathlib.Path(arg).resolve()) for arg in args if isFontPath(arg)]
 
 
-def sendPathsToRunningInstance(paths):
-    """Return True if a running instance accepted the paths."""
+def connectToRunningInstance(paths):
+    """Return True if another instance of this app is running. Send it the
+    paths, if there are any."""
     socket = QLocalSocket()
     socket.connectToServer(singleInstanceName)
     if not socket.waitForConnected(500):
         return False
-    socket.write(json.dumps(paths).encode("utf-8"))
-    socket.flush()
-    socket.waitForBytesWritten(1000)
+    if paths:
+        socket.write(json.dumps(paths).encode("utf-8"))
+        socket.flush()
+        socket.waitForBytesWritten(1000)
     socket.disconnectFromServer()
     if socket.state() != QLocalSocket.LocalSocketState.UnconnectedState:
         socket.waitForDisconnected(1000)
@@ -847,10 +858,9 @@ def sendPathsToRunningInstance(paths):
 class SingleInstanceServer(QObject):
     """Receive font paths from later launches of the app."""
 
-    def __init__(self, port, window):
+    def __init__(self, port):
         super().__init__()
         self.port = port
-        self.window = window
         self.server = QLocalServer(self)
         self.server.newConnection.connect(self.newConnection)
         self.server.setSocketOptions(QLocalServer.SocketOption.UserAccessOption)
@@ -881,10 +891,6 @@ class SingleInstanceServer(QObject):
         for path in paths:
             if isinstance(path, str) and isFontPath(path):
                 openFile(path, self.port)
-        if not paths:
-            self.window.showNormal()
-            self.window.raise_()
-            self.window.activateWindow()
 
 
 def main():
@@ -900,10 +906,18 @@ def main():
 
     app = FontraApplication(sys.argv, port)
 
-    if sendPathsToRunningInstance(getFontPathsFromArguments(app.arguments()[1:])):
+    # macOS already hands files to the running instance itself
+    singleInstance = sys.platform != "darwin"
+    paths = getFontPathsFromArguments(app.arguments()[1:])
+    instanceRunning = singleInstance and connectToRunningInstance(paths)
+
+    if instanceRunning and paths:
         serverProcess.terminate()
         serverProcess.join()
         sys.exit(0)
+
+    if singleInstance and not instanceRunning:
+        singleInstanceServer = SingleInstanceServer(port)  # noqa: F841
 
     def cleanup():
         queue.put(None)
@@ -918,7 +932,6 @@ def main():
     app.aboutToQuit.connect(cleanup)
 
     mainWindow = FontraMainWidget(port)
-    singleInstanceServer = SingleInstanceServer(port, mainWindow)  # noqa: F841
 
     thread = callInNewThread(queueGetter, queue, mainWindow.messageFromServer)
 

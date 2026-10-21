@@ -41,6 +41,7 @@ from PyQt6.QtCore import (
     pyqtSignal,
 )
 from PyQt6.QtGui import QAction, QKeySequence
+from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -821,6 +822,71 @@ def openPathsFromArguments(args, port):
             openFile(arg, port)
 
 
+singleInstanceName = "xyz.fontra.FontraPak"
+
+
+def getFontPathsFromArguments(args):
+    return [str(pathlib.Path(arg).resolve()) for arg in args if isFontPath(arg)]
+
+
+def sendPathsToRunningInstance(paths):
+    """Return True if a running instance accepted the paths."""
+    socket = QLocalSocket()
+    socket.connectToServer(singleInstanceName)
+    if not socket.waitForConnected(500):
+        return False
+    socket.write(json.dumps(paths).encode("utf-8"))
+    socket.flush()
+    socket.waitForBytesWritten(1000)
+    socket.disconnectFromServer()
+    if socket.state() != QLocalSocket.LocalSocketState.UnconnectedState:
+        socket.waitForDisconnected(1000)
+    return True
+
+
+class SingleInstanceServer(QObject):
+    """Receive font paths from later launches of the app."""
+
+    def __init__(self, port, window):
+        super().__init__()
+        self.port = port
+        self.window = window
+        self.server = QLocalServer(self)
+        self.server.newConnection.connect(self.newConnection)
+        self.server.setSocketOptions(QLocalServer.SocketOption.UserAccessOption)
+        # We only get here if no running instance answered, so an existing
+        # socket file is stale.
+        QLocalServer.removeServer(singleInstanceName)
+        if not self.server.listen(singleInstanceName):
+            print("single instance server failed:", self.server.errorString())
+
+    def newConnection(self):
+        socket = self.server.nextPendingConnection()
+        socket.disconnected.connect(socket.deleteLater)
+        socket.readyRead.connect(lambda: self.readPaths(socket))
+        if socket.bytesAvailable():
+            self.readPaths(socket)
+
+    def readPaths(self, socket):
+        data = bytes(socket.readAll())
+        if not data:
+            return
+        try:
+            paths = json.loads(data.decode("utf-8"))
+        except ValueError:
+            return
+        if not isinstance(paths, list):
+            return
+        socket.disconnectFromServer()
+        for path in paths:
+            if isinstance(path, str) and isFontPath(path):
+                openFile(path, self.port)
+        if not paths:
+            self.window.showNormal()
+            self.window.raise_()
+            self.window.activateWindow()
+
+
 def main():
     os.environ["SSL_CERT_FILE"] = certifi.where()
 
@@ -833,6 +899,11 @@ def main():
     serverProcess.start()
 
     app = FontraApplication(sys.argv, port)
+
+    if sendPathsToRunningInstance(getFontPathsFromArguments(app.arguments()[1:])):
+        serverProcess.terminate()
+        serverProcess.join()
+        sys.exit(0)
 
     def cleanup():
         queue.put(None)
@@ -847,6 +918,7 @@ def main():
     app.aboutToQuit.connect(cleanup)
 
     mainWindow = FontraMainWidget(port)
+    singleInstanceServer = SingleInstanceServer(port, mainWindow)  # noqa: F841
 
     thread = callInNewThread(queueGetter, queue, mainWindow.messageFromServer)
 

@@ -79,6 +79,9 @@ for module_name in modules_to_collect_all:
         print("no metadata for", module_name)
 
 
+datas += [("icon/FontraIcon.ico", "icon")]
+
+
 block_cipher = None
 
 

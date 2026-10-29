@@ -137,7 +137,7 @@ latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
 def resourcePath(relativePath):
     # sys._MEIPASS is set inside a PyInstaller bundle
     base = getattr(sys, "_MEIPASS", None)
-    base = pathlib.Path(base) if base else pathlib.Path(__file__).parent
+    base = pathlib.Path(base) if base is not None else pathlib.Path(__file__).parent
     return base / relativePath
 
 

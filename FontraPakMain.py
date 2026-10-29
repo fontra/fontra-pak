@@ -41,7 +41,7 @@ from PyQt6.QtCore import (
     QTimer,
     pyqtSignal,
 )
-from PyQt6.QtGui import QAction, QKeySequence
+from PyQt6.QtGui import QAction, QIcon, QKeySequence
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtWidgets import (
     QApplication,
@@ -132,6 +132,13 @@ exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 openFontFilter = f"Fonts ({' '.join(f'*{ext}' for ext in sorted(fileExtensions))})"
 
 latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
+
+
+def resourcePath(relativePath):
+    # sys._MEIPASS is set inside a PyInstaller bundle
+    base = getattr(sys, "_MEIPASS", None)
+    base = pathlib.Path(base) if base is not None else pathlib.Path(__file__).parent
+    return base / relativePath
 
 
 def runningAsFlatpak() -> bool:
@@ -905,6 +912,7 @@ def main():
     serverProcess.start()
 
     app = FontraApplication(sys.argv, port)
+    app.setWindowIcon(QIcon(str(resourcePath("icon/FontraIcon.ico"))))
 
     # macOS already hands files to the running instance itself
     singleInstance = sys.platform != "darwin" and "--new-instance" not in sys.argv

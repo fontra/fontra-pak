@@ -727,8 +727,9 @@ def showMessageDialog(
     icon=QMessageBox.Icon.Warning,
     buttons=None,
     defaultButton=None,
+    parent=None
 ):
-    dialog = QMessageBox()
+    dialog = QMessageBox(parent)
     dialog.setWindowTitle("Fontra Pak")
     if icon is not None:
         dialog.setIcon(icon)

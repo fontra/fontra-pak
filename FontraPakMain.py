@@ -280,6 +280,14 @@ class FontraMainWidget(QMainWindow):
         fileMenu.addSeparator()
         fileMenu.addAction(actionQuit)
 
+        actionDocs = QAction("&Documentation", self)
+        actionDocs.triggered.connect(lambda: openURL("https://docs.fontra.xyz"))
+        actionLatestDownload = QAction("&Download latest Fontra Pak", self)
+        actionLatestDownload.triggered.connect(self.goToLatestDownload)
+        helpMenu = menuBar.addMenu("&Help")
+        helpMenu.addAction(actionDocs)
+        helpMenu.addAction(actionLatestDownload)
+
         self.setWindowTitle("Fontra Pak")
         self.resize(720, 480)
 

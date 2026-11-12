@@ -317,6 +317,19 @@ class FontraMainWidget(QMainWindow):
 
         layout.addLayout(buttonsLayout, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
 
+        if sys.platform in {"darwin", "win32", "linux"} and not runningAsFlatpak():
+            self.downloadButton = QPushButton("‼️ A new version is available ‼️", self)
+            self.downloadButton.setSizePolicy(
+                QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+            )
+            self.downloadButton.clicked.connect(self.goToLatestDownload)
+            self.downloadButton.setVisible(False)
+            layout.addWidget(
+                self.downloadButton, 0, 1, alignment=Qt.AlignmentFlag.AlignRight
+            )
+            if "test-startup" not in sys.argv:
+                self.checkForUpdate(1500)
+
         layout.addWidget(self.label, 1, 0, 1, 2)
 
         readOnlyCheckBox = QCheckBox("Open fonts in read-only mode")
@@ -348,18 +361,6 @@ class FontraMainWidget(QMainWindow):
         layout.addWidget(self.sampleTextBox, 4, 0, 1, 2)
 
         layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 5, 0)
-
-        if sys.platform in {"darwin", "win32", "linux"} and not runningAsFlatpak():
-            self.downloadButton = QPushButton("Download latest Fontra Pak", self)
-            self.downloadButton.setSizePolicy(
-                QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
-            )
-            self.downloadButton.clicked.connect(self.goToLatestDownload)
-            layout.addWidget(
-                self.downloadButton, 5, 1, alignment=Qt.AlignmentFlag.AlignRight
-            )
-            if "test-startup" not in sys.argv:
-                self.checkForUpdate(1500)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -573,7 +574,7 @@ class FontraMainWidget(QMainWindow):
 
         if downloadURL is not None and latestVersion != fontraVersion:
             callInMainThread(
-                self.downloadButton.setText, "‼️ A new version is available ‼️"
+                self.downloadButton.setVisible, True
             )
         else:
             # Try again in a bit more than a day

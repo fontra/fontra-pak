@@ -279,9 +279,21 @@ class FontraMainWidget(QMainWindow):
         actionDocs.triggered.connect(lambda: openURL("https://docs.fontra.xyz"))
         actionLatestDownload = QAction("&Download latest Fontra Pak", self)
         actionLatestDownload.triggered.connect(self.goToLatestDownload)
+        actionAbout = QAction("&About Fontra Pak", self)
+        actionAbout.triggered.connect(lambda:
+            showMessageDialog(
+                "Fontra",
+                f"Version: {fontraVersion}",
+                icon=QMessageBox.Icon.Information,
+                buttons=QMessageBox.StandardButton.Ok,
+                defaultButton=QMessageBox.StandardButton.Ok,
+                parent=self
+            )
+        )
         helpMenu = menuBar.addMenu("&Help")
         helpMenu.addAction(actionDocs)
         helpMenu.addAction(actionLatestDownload)
+        helpMenu.addAction(actionAbout)
 
         self.setWindowTitle("Fontra Pak")
         self.resize(720, 480)

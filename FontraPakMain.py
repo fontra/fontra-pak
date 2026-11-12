@@ -723,6 +723,7 @@ def showMessageDialog(
     defaultButton=None,
 ):
     dialog = QMessageBox()
+    dialog.setWindowTitle("Fontra Pak")
     if icon is not None:
         dialog.setIcon(icon)
     dialog.setText(message)

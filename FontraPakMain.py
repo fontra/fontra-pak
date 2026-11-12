@@ -372,8 +372,6 @@ class FontraMainWidget(QMainWindow):
         layout.addWidget(QLabel("Sample text:"), 3, 0)
         layout.addWidget(self.sampleTextBox, 4, 0, 1, 2)
 
-        layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 5, 0)
-
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)

@@ -387,6 +387,7 @@ class FontraMainWidget(QMainWindow):
                 buttons=QMessageBox.StandardButton.Close
                 | QMessageBox.StandardButton.Cancel,
                 defaultButton=QMessageBox.StandardButton.Cancel,
+                parent=self
             )
             if response == QMessageBox.StandardButton.Cancel:
                 event.ignore()

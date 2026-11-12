@@ -315,13 +315,7 @@ class FontraMainWidget(QMainWindow):
         buttonsLayout.addWidget(buttonNew)
         buttonsLayout.addWidget(buttonOpen)
 
-        buttonDocs = QPushButton("Documentation", self)
-        buttonDocs.setToolTip("Open documentation website")
-        buttonDocs.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        buttonDocs.clicked.connect(lambda: openURL("https://docs.fontra.xyz"))
-
         layout.addLayout(buttonsLayout, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(buttonDocs, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
 
         layout.addWidget(self.label, 1, 0, 1, 2)
 

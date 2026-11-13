@@ -271,7 +271,7 @@ class FontraMainWidget(QMainWindow):
         actionOpen = QAction("&Open Font...", self)
         actionOpen.setShortcut(QKeySequence(QKeySequence.StandardKey.Open))
         actionOpen.triggered.connect(self.openFont)
-        actionQuit = QAction("Quit", self)
+        actionQuit = QAction("&Quit", self)
         actionQuit.setShortcut(QKeySequence(QKeySequence.StandardKey.Quit))
         actionQuit.triggered.connect(lambda: QApplication.instance().quit())
         fileMenu = menuBar.addMenu("&File")

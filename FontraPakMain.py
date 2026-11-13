@@ -276,13 +276,13 @@ class FontraMainWidget(QMainWindow):
         fileMenu.addAction(actionNew)
         fileMenu.addAction(actionOpen)
 
-        actionDocs = QAction("Documentation", self)
+        actionDocs = QAction("&Documentation", self)
         actionDocs.triggered.connect(lambda: openURL("https://docs.fontra.xyz"))
-        actionChangelog = QAction("Changelog", self)
+        actionChangelog = QAction("&Changelog", self)
         actionChangelog.triggered.connect(lambda: openURL(releasesPageURL))
         actionLatestDownload = QAction("Download latest Fontra Pak", self)
         actionLatestDownload.triggered.connect(self.goToLatestDownload)
-        actionAbout = QAction("About Fontra Pak", self)
+        actionAbout = QAction("&About Fontra Pak", self)
         actionAbout.triggered.connect(lambda:
             showMessageDialog(
                 "Fontra",

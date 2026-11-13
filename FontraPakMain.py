@@ -131,7 +131,8 @@ exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 
 openFontFilter = f"Fonts ({' '.join(f'*{ext}' for ext in sorted(fileExtensions))})"
 
-latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
+releasesPageURL = "https://github.com/fontra/fontra-pak/releases"
+latestReleasePageURL = releasesPageURL + "/latest"
 
 
 def resourcePath(relativePath):
@@ -275,11 +276,13 @@ class FontraMainWidget(QMainWindow):
         fileMenu.addAction(actionNew)
         fileMenu.addAction(actionOpen)
 
-        actionDocs = QAction("&Documentation", self)
+        actionDocs = QAction("Documentation", self)
         actionDocs.triggered.connect(lambda: openURL("https://docs.fontra.xyz"))
-        actionLatestDownload = QAction("&Download latest Fontra Pak", self)
+        actionChangelog = QAction("Changelog", self)
+        actionChangelog.triggered.connect(lambda: openURL(releasesPageURL))
+        actionLatestDownload = QAction("Download latest Fontra Pak", self)
         actionLatestDownload.triggered.connect(self.goToLatestDownload)
-        actionAbout = QAction("&About Fontra Pak", self)
+        actionAbout = QAction("About Fontra Pak", self)
         actionAbout.triggered.connect(lambda:
             showMessageDialog(
                 "Fontra",
@@ -292,6 +295,8 @@ class FontraMainWidget(QMainWindow):
         )
         helpMenu = menuBar.addMenu("&Help")
         helpMenu.addAction(actionDocs)
+        helpMenu.addAction(actionChangelog)
+        helpMenu.addSeparator()
         helpMenu.addAction(actionLatestDownload)
         helpMenu.addAction(actionAbout)
 

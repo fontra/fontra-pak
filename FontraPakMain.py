@@ -131,8 +131,8 @@ exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 
 openFontFilter = f"Fonts ({' '.join(f'*{ext}' for ext in sorted(fileExtensions))})"
 
-releasesPageURL = "https://github.com/fontra/fontra-pak/releases"
-latestReleasePageURL = releasesPageURL + "/latest"
+changelogURL = "https://fontra.xyz/changelog.html"
+latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
 
 
 def resourcePath(relativePath):
@@ -284,7 +284,7 @@ class FontraMainWidget(QMainWindow):
         actionDocs = QAction("&Documentation", self)
         actionDocs.triggered.connect(lambda: openURL("https://docs.fontra.xyz"))
         actionChangelog = QAction("&Changelog", self)
-        actionChangelog.triggered.connect(lambda: openURL(releasesPageURL))
+        actionChangelog.triggered.connect(lambda: openURL(changelogURL))
         actionLatestDownload = QAction("Download latest Fontra Pak", self)
         actionLatestDownload.triggered.connect(self.goToLatestDownload)
         actionAbout = QAction("&About Fontra Pak", self)

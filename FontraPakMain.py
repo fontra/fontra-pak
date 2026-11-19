@@ -452,7 +452,7 @@ class FontraMainWidget(QMainWindow):
         try:
             asyncio.run(createNewFontAndPopulate(fontPath))
         except Exception as e:
-            showMessageDialog("The new font could not be saved", repr(e))
+            showMessageDialog("The new font could not be saved", repr(e), parent=self)
             return
 
         if os.path.exists(fontPath):
@@ -469,6 +469,7 @@ class FontraMainWidget(QMainWindow):
             showMessageDialog(
                 "Cannot open " + ", ".join(notFonts),
                 "Not a font, or not a supported font format",
+                parent=self,
             )
 
         if fontPaths:
@@ -516,6 +517,7 @@ class FontraMainWidget(QMainWindow):
             showMessageDialog(
                 "Cannot export font",
                 "The destination file cannot be the same as the source file",
+                parent=self,
             )
             return
 
@@ -568,6 +570,7 @@ class FontraMainWidget(QMainWindow):
                             "The font could not be exported",
                             infoText,
                             detailedText=logData,
+                            parent=self,
                         )
             finally:
                 os.unlink(logFilePath)

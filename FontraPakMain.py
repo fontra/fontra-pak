@@ -361,7 +361,7 @@ class FontraMainWidget(QMainWindow):
         self.sampleTextBox.setTabChangesFocus(True)
         self.sampleTextBox.setFixedHeight(50)
         self.sampleTextBox.setPlaceholderText(
-            "Enter some text to launch into the editor view,\n"
+            "Enter some sample text to launch into the editor view,\n"
             + "or leave empty to launch into the font overview"
         )
 
@@ -370,8 +370,7 @@ class FontraMainWidget(QMainWindow):
                 "editorSampleText", self.sampleTextBox.toPlainText()
             )
         )
-        layout.addWidget(QLabel("Sample text:"), 2, 0)
-        layout.addWidget(self.sampleTextBox, 3, 0, 1, 2)
+        layout.addWidget(self.sampleTextBox, 2, 0, 1, 2)
 
         widget = QWidget()
         widget.setLayout(layout)

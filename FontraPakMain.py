@@ -60,7 +60,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QWidget,
     QVBoxLayout,
-    QFrame
+    QFrame,
 )
 
 from ui_utils import addClass, removeClass
@@ -322,11 +322,13 @@ class FontraMainWidget(QMainWindow):
         dropAreaTitle = DropAreaText("Drop font files here")
         addClass(dropAreaTitle, "drop-area-title")
         dropAreaSubtitle = DropAreaText("or double-click to browse")
-        dropAreaDisclaimer = DropAreaText("Your fonts stay on your computer and are never uploaded anywhere.")
+        dropAreaDisclaimer = DropAreaText(
+            "Your fonts stay on your computer and are never uploaded anywhere."
+        )
         dropAreaFormats = [
             "<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk",
             "<b>Partial read and write:</b> .glyphs, .glyphspackage",
-            "<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx"
+            "<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx",
         ]
 
         dropAreaLayout.addWidget(dropAreaTitle)
@@ -895,7 +897,7 @@ def updateTheme(app):
     isDark = scheme == Qt.ColorScheme.Dark
     themeFile = "style_dark.qss" if isDark else "style_light.qss"
     themeStylesheet = resourcePath("style/" + themeFile).read_text(encoding="utf-8")
-    
+
     app.setStyleSheet(baseStylesheet + "\n" + themeStylesheet)
 
 

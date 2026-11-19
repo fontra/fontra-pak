@@ -273,12 +273,21 @@ class FontraMainWidget(QMainWindow):
         actionOpen = QAction("&Open Font...", self)
         actionOpen.setShortcut(QKeySequence(QKeySequence.StandardKey.Open))
         actionOpen.triggered.connect(self.openFont)
+        actionReadOnlyCheckBox = QAction("Open fonts in read-only mode", self)
+        actionReadOnlyCheckBox.setCheckable(True)
+        if applicationSettings.value("openFontsInReadOnlyMode", False, type=bool):
+            actionReadOnlyCheckBox.setChecked(True)
+        actionReadOnlyCheckBox.toggled.connect(
+            lambda s: applicationSettings.setValue("openFontsInReadOnlyMode", bool(s))
+        )
         actionQuit = QAction("&Quit", self)
         actionQuit.setShortcut(QKeySequence(QKeySequence.StandardKey.Quit))
         actionQuit.triggered.connect(lambda: QApplication.instance().quit())
         fileMenu = menuBar.addMenu("&File")
         fileMenu.addAction(actionNew)
         fileMenu.addAction(actionOpen)
+        fileMenu.addSeparator()
+        fileMenu.addAction(actionReadOnlyCheckBox)
         fileMenu.addSeparator()
         fileMenu.addAction(actionQuit)
 

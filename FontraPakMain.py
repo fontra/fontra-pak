@@ -99,6 +99,7 @@ Your fonts stay on your computer and are never uploaded anywhere.
 <br>
 <b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx
 """
+from ui_utils import addClass, removeClass
 
 fileTypes = [
     # name, extension

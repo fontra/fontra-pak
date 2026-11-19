@@ -1,0 +1,19 @@
+QFrame#dropArea {
+    border-radius: 20px;
+    border: 5px dashed lightgray;
+    padding: 16px;
+    background-color: rgba(255,255,255,128);
+}
+
+QFrame#dropArea QLabel {
+    font-size: 18px;
+}
+
+QFrame#dropArea QLabel[class~="drop-area-title"] {
+    font-size: 40px;
+}
+
+QFrame#dropArea[class~="dropping"] {
+    background-color: rgba(255,255,255,64);
+    border-color: gray;
+}

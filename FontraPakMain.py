@@ -59,46 +59,10 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QWidget,
+    QVBoxLayout,
+    QFrame
 )
 
-commonCSS = """
-border-radius: 20px;
-border-style: dashed;
-font-size: 18px;
-padding: 16px;
-"""
-
-neutralCSS = (
-    """
-background-color: rgba(255,255,255,128);
-border: 5px solid lightgray;
-"""
-    + commonCSS
-)
-
-droppingCSS = (
-    """
-background-color: rgba(255,255,255,64);
-border: 5px solid gray;
-"""
-    + commonCSS
-)
-
-mainText = """
-<span style="font-size: 40px;">Drop font files here</span>
-<br>
-or double-click to browse
-<br>
-<br>
-Your fonts stay on your computer and are never uploaded anywhere.
-<br>
-<br>
-<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk
-<br>
-<b>Partial read and write:</b> .glyphs, .glyphspackage
-<br>
-<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx
-"""
 from ui_utils import addClass, removeClass
 
 fileTypes = [
@@ -252,13 +216,23 @@ class OpenFontDialog(QFileDialog):
         self.done(QDialog.DialogCode.Accepted)
 
 
-class DropAreaLabel(QLabel):
+class DropAreaFrame(QFrame):
     doubleClicked = pyqtSignal()
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.doubleClicked.emit()
         super().mouseDoubleClickEvent(event)
+
+
+class DropAreaText(QLabel):
+    def __init__(self, text="", parent=None):
+        super().__init__(text, parent)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred
+        )
+        self.setWordWrap(True)
 
 
 class FontraMainWidget(QMainWindow):
@@ -306,15 +280,6 @@ class FontraMainWidget(QMainWindow):
 
         self.setAcceptDrops(True)
 
-        self.label = DropAreaLabel(mainText)
-        self.label.doubleClicked.connect(self.openFont)
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label.setStyleSheet(neutralCSS)
-        self.label.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
-        )
-        self.label.setWordWrap(True)
-
         # Helpful: https://www.pythontutorial.net/pyqt/pyqt-qgridlayout/
         layout = QGridLayout()
 
@@ -345,7 +310,38 @@ class FontraMainWidget(QMainWindow):
             if "test-startup" not in sys.argv:
                 self.checkForUpdate(1500)
 
-        layout.addWidget(self.label, 1, 0, 1, 2)
+        self.dropAreaFrame = DropAreaFrame()
+        self.dropAreaFrame.doubleClicked.connect(self.openFont)
+        self.dropAreaFrame.setObjectName("dropArea")
+        self.dropAreaFrame.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+        dropAreaLayout = QVBoxLayout(self.dropAreaFrame)
+        dropAreaLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        dropAreaTitle = DropAreaText("Drop font files here")
+        addClass(dropAreaTitle, "drop-area-title")
+        dropAreaSubtitle = DropAreaText("or double-click to browse")
+        dropAreaDisclaimer = DropAreaText("Your fonts stay on your computer and are never uploaded anywhere.")
+        dropAreaFormats = [
+            "<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk",
+            "<b>Partial read and write:</b> .glyphs, .glyphspackage",
+            "<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx"
+        ]
+
+        dropAreaLayout.addWidget(dropAreaTitle)
+        dropAreaLayout.addSpacing(-5)
+        dropAreaLayout.addWidget(dropAreaSubtitle)
+        dropAreaLayout.addSpacing(14)
+        dropAreaLayout.addWidget(dropAreaDisclaimer)
+        dropAreaLayout.addSpacing(14)
+        for i, dropAreaFormat in enumerate(dropAreaFormats):
+            formatLabel = DropAreaText(dropAreaFormat)
+            dropAreaLayout.addWidget(formatLabel)
+            if i < len(dropAreaFormats) - 1:
+                dropAreaLayout.addSpacing(-5)
+
+        layout.addWidget(self.dropAreaFrame, 1, 0, 1, 2)
 
         readOnlyCheckBox = QCheckBox("Open fonts in read-only mode")
         readOnlyCheckBox.setCheckState(
@@ -400,16 +396,15 @@ class FontraMainWidget(QMainWindow):
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
-            self.label.setStyleSheet(droppingCSS)
+            addClass(self.dropAreaFrame, "dropping")
         else:
             event.ignore()
 
     def dragLeaveEvent(self, event):
-        self.label.setStyleSheet("background-color: lightgray;")
-        self.label.setStyleSheet(neutralCSS)
+        removeClass(self.dropAreaFrame, "dropping")
 
     def dropEvent(self, event):
-        self.label.setStyleSheet(neutralCSS)
+        removeClass(self.dropAreaFrame, "dropping")
         files = [u.toLocalFile() for u in event.mimeData().urls()]
         for path in files:
             openFile(path, self.port)

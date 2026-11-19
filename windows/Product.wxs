@@ -33,6 +33,42 @@
           <File Id="FontraPakExe"
                 Source="..\dist\Fontra Pak.exe"
                 KeyPath="yes" />
+
+          <!-- File associations.
+               .designspace and .glyphs: Fontra Pak becomes the default handler
+               (the Extension elements write HKCR\.ext = ProgId).
+               .ttf/.otf/.woff/.woff2/.ttx: Fontra Pak is only added to
+               "Open with" (OpenWithProgids) and no default is touched. -->
+          <ProgId Id="FontraPak.FontFile"
+                  Description="Font file (Fontra Pak)"
+                  Icon="AppIcon"
+                  IconIndex="0">
+            <Extension Id="designspace">
+              <Verb Id="open" Command="Open" TargetFile="FontraPakExe" Argument='"%1"' />
+            </Extension>
+            <Extension Id="glyphs">
+              <Verb Id="open" Command="Open" TargetFile="FontraPakExe" Argument='"%1"' />
+            </Extension>
+          </ProgId>
+
+          <!-- Also list Fontra Pak under "Open with" for the two default types,
+               so it stays available if the user later picks another default. -->
+          <RegistryValue Root="HKCR" Key=".designspace\OpenWithProgids"
+                         Name="FontraPak.FontFile" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key=".glyphs\OpenWithProgids"
+                         Name="FontraPak.FontFile" Type="string" Value="" />
+
+          <!-- "Open with" only (no default change) for common font formats. -->
+          <RegistryValue Root="HKCR" Key=".ttf\OpenWithProgids"
+                         Name="FontraPak.FontFile" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key=".otf\OpenWithProgids"
+                         Name="FontraPak.FontFile" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key=".woff\OpenWithProgids"
+                         Name="FontraPak.FontFile" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key=".woff2\OpenWithProgids"
+                         Name="FontraPak.FontFile" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key=".ttx\OpenWithProgids"
+                         Name="FontraPak.FontFile" Type="string" Value="" />
         </Component>
       </Directory>
     </StandardDirectory>

@@ -289,16 +289,7 @@ class FontraMainWidget(QMainWindow):
         actionLatestDownload = QAction("Download latest Fontra Pak", self)
         actionLatestDownload.triggered.connect(self.goToLatestDownload)
         actionAbout = QAction("&About Fontra Pak", self)
-        actionAbout.triggered.connect(
-            lambda: showMessageDialog(
-                "Fontra",
-                f"Version: {fontraVersion}",
-                icon=QMessageBox.Icon.Information,
-                buttons=QMessageBox.StandardButton.Ok,
-                defaultButton=QMessageBox.StandardButton.Ok,
-                parent=self,
-            )
-        )
+        actionAbout.triggered.connect(self.aboutFontra)
         helpMenu = menuBar.addMenu("&Help")
         helpMenu.addAction(actionDocs)
         helpMenu.addAction(actionChangelog)
@@ -615,6 +606,16 @@ class FontraMainWidget(QMainWindow):
             downloadURL = latestReleasePageURL
 
         openURL(downloadURL)
+
+    def aboutFontra(self):
+        showMessageDialog(
+            "Fontra",
+            f"Version: {fontraVersion}",
+            icon=QMessageBox.Icon.Information,
+            buttons=QMessageBox.StandardButton.Ok,
+            defaultButton=QMessageBox.StandardButton.Ok,
+            parent=self,
+        )
 
 
 def fetchLatestReleaseInfo() -> tuple[str, str | None]:

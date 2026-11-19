@@ -131,6 +131,8 @@ exportExtensionMapping = {v: k for k, v in exportFileTypesMapping.items()}
 
 openFontFilter = f"Fonts ({' '.join(f'*{ext}' for ext in sorted(fileExtensions))})"
 
+changelogURL = "https://fontra.xyz/changelog.html"
+docsURL = "https://docs.fontra.xyz"
 latestReleasePageURL = "https://github.com/fontra/fontra-pak/releases/latest"
 
 
@@ -280,6 +282,21 @@ class FontraMainWidget(QMainWindow):
         fileMenu.addSeparator()
         fileMenu.addAction(actionQuit)
 
+        actionDocs = QAction("&Documentation", self)
+        actionDocs.triggered.connect(lambda: openURL(docsURL))
+        actionChangelog = QAction("&Changelog", self)
+        actionChangelog.triggered.connect(lambda: openURL(changelogURL))
+        actionLatestDownload = QAction("Download latest Fontra Pak", self)
+        actionLatestDownload.triggered.connect(self.goToLatestDownload)
+        actionAbout = QAction("&About Fontra Pak", self)
+        actionAbout.triggered.connect(self.aboutFontra)
+        helpMenu = menuBar.addMenu("&Help")
+        helpMenu.addAction(actionDocs)
+        helpMenu.addAction(actionChangelog)
+        helpMenu.addSeparator()
+        helpMenu.addAction(actionLatestDownload)
+        helpMenu.addAction(actionAbout)
+
         self.setWindowTitle("Fontra Pak")
         self.resize(720, 480)
 
@@ -312,13 +329,20 @@ class FontraMainWidget(QMainWindow):
         buttonsLayout.addWidget(buttonNew)
         buttonsLayout.addWidget(buttonOpen)
 
-        buttonDocs = QPushButton("Documentation", self)
-        buttonDocs.setToolTip("Open documentation website")
-        buttonDocs.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        buttonDocs.clicked.connect(lambda: openURL("https://docs.fontra.xyz"))
-
         layout.addLayout(buttonsLayout, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(buttonDocs, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
+
+        if sys.platform in {"darwin", "win32", "linux"} and not runningAsFlatpak():
+            self.downloadButton = QPushButton("‼️ A new version is available ‼️", self)
+            self.downloadButton.setSizePolicy(
+                QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+            )
+            self.downloadButton.clicked.connect(self.goToLatestDownload)
+            self.downloadButton.setVisible(False)
+            layout.addWidget(
+                self.downloadButton, 0, 1, alignment=Qt.AlignmentFlag.AlignRight
+            )
+            if "test-startup" not in sys.argv:
+                self.checkForUpdate(1500)
 
         layout.addWidget(self.label, 1, 0, 1, 2)
 
@@ -351,20 +375,6 @@ class FontraMainWidget(QMainWindow):
         layout.addWidget(QLabel("Sample text:"), 3, 0)
         layout.addWidget(self.sampleTextBox, 4, 0, 1, 2)
 
-        layout.addWidget(QLabel(f"Fontra version {fontraVersion}"), 5, 0)
-
-        if sys.platform in {"darwin", "win32", "linux"} and not runningAsFlatpak():
-            self.downloadButton = QPushButton("Download latest Fontra Pak", self)
-            self.downloadButton.setSizePolicy(
-                QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
-            )
-            self.downloadButton.clicked.connect(self.goToLatestDownload)
-            layout.addWidget(
-                self.downloadButton, 5, 1, alignment=Qt.AlignmentFlag.AlignRight
-            )
-            if "test-startup" not in sys.argv:
-                self.checkForUpdate(1500)
-
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
@@ -378,6 +388,7 @@ class FontraMainWidget(QMainWindow):
                 buttons=QMessageBox.StandardButton.Close
                 | QMessageBox.StandardButton.Cancel,
                 defaultButton=QMessageBox.StandardButton.Cancel,
+                parent=self,
             )
             if response == QMessageBox.StandardButton.Cancel:
                 event.ignore()
@@ -432,7 +443,7 @@ class FontraMainWidget(QMainWindow):
         try:
             asyncio.run(createNewFontAndPopulate(fontPath))
         except Exception as e:
-            showMessageDialog("The new font could not be saved", repr(e))
+            showMessageDialog("The new font could not be saved", repr(e), parent=self)
             return
 
         if os.path.exists(fontPath):
@@ -449,6 +460,7 @@ class FontraMainWidget(QMainWindow):
             showMessageDialog(
                 "Cannot open " + ", ".join(notFonts),
                 "Not a font, or not a supported font format",
+                parent=self,
             )
 
         if fontPaths:
@@ -496,6 +508,7 @@ class FontraMainWidget(QMainWindow):
             showMessageDialog(
                 "Cannot export font",
                 "The destination file cannot be the same as the source file",
+                parent=self,
             )
             return
 
@@ -548,6 +561,7 @@ class FontraMainWidget(QMainWindow):
                             "The font could not be exported",
                             infoText,
                             detailedText=logData,
+                            parent=self,
                         )
             finally:
                 os.unlink(logFilePath)
@@ -576,9 +590,7 @@ class FontraMainWidget(QMainWindow):
         latestVersion, downloadURL = fetchLatestReleaseInfo()
 
         if downloadURL is not None and latestVersion != fontraVersion:
-            callInMainThread(
-                self.downloadButton.setText, "‼️ A new version is available ‼️"
-            )
+            callInMainThread(self.downloadButton.setVisible, True)
         else:
             # Try again in a bit more than a day
             hours = 24 + 4 * random()
@@ -594,6 +606,16 @@ class FontraMainWidget(QMainWindow):
             downloadURL = latestReleasePageURL
 
         openURL(downloadURL)
+
+    def aboutFontra(self):
+        showMessageDialog(
+            "Fontra",
+            f"Version: {fontraVersion}",
+            icon=QMessageBox.Icon.Information,
+            buttons=QMessageBox.StandardButton.Ok,
+            defaultButton=QMessageBox.StandardButton.Ok,
+            parent=self,
+        )
 
 
 def fetchLatestReleaseInfo() -> tuple[str, str | None]:
@@ -724,8 +746,10 @@ def showMessageDialog(
     icon=QMessageBox.Icon.Warning,
     buttons=None,
     defaultButton=None,
+    parent=None,
 ):
-    dialog = QMessageBox()
+    dialog = QMessageBox(parent)
+    dialog.setWindowTitle("Fontra Pak")
     if icon is not None:
         dialog.setIcon(icon)
     dialog.setText(message)

@@ -892,6 +892,17 @@ def connectToRunningInstance(paths):
     return True
 
 
+def updateTheme(app):
+    baseStylesheet = resourcePath("style/style.qss").read_text(encoding="utf-8")
+
+    scheme = app.styleHints().colorScheme()
+    isDark = scheme == Qt.ColorScheme.Dark
+    themeFile = "style_dark.qss" if isDark else "style_light.qss"
+    themeStylesheet = resourcePath("style/" + themeFile).read_text(encoding="utf-8")
+    
+    app.setStyleSheet(baseStylesheet + "\n" + themeStylesheet)
+
+
 class SingleInstanceServer(QObject):
     """Receive font paths from later launches of the app."""
 
@@ -970,6 +981,11 @@ def main():
     app.aboutToQuit.connect(cleanup)
 
     mainWindow = FontraMainWidget(port)
+
+    updateTheme(app)
+    app.styleHints().colorSchemeChanged.connect(
+        lambda: QTimer.singleShot(50, lambda: updateTheme(app))
+    )
 
     thread = callInNewThread(queueGetter, queue, mainWindow.messageFromServer)
 

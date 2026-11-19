@@ -289,14 +289,14 @@ class FontraMainWidget(QMainWindow):
         actionLatestDownload = QAction("Download latest Fontra Pak", self)
         actionLatestDownload.triggered.connect(self.goToLatestDownload)
         actionAbout = QAction("&About Fontra Pak", self)
-        actionAbout.triggered.connect(lambda:
-            showMessageDialog(
+        actionAbout.triggered.connect(
+            lambda: showMessageDialog(
                 "Fontra",
                 f"Version: {fontraVersion}",
                 icon=QMessageBox.Icon.Information,
                 buttons=QMessageBox.StandardButton.Ok,
                 defaultButton=QMessageBox.StandardButton.Ok,
-                parent=self
+                parent=self,
             )
         )
         helpMenu = menuBar.addMenu("&Help")
@@ -397,7 +397,7 @@ class FontraMainWidget(QMainWindow):
                 buttons=QMessageBox.StandardButton.Close
                 | QMessageBox.StandardButton.Cancel,
                 defaultButton=QMessageBox.StandardButton.Cancel,
-                parent=self
+                parent=self,
             )
             if response == QMessageBox.StandardButton.Cancel:
                 event.ignore()
@@ -596,9 +596,7 @@ class FontraMainWidget(QMainWindow):
         latestVersion, downloadURL = fetchLatestReleaseInfo()
 
         if downloadURL is not None and latestVersion != fontraVersion:
-            callInMainThread(
-                self.downloadButton.setVisible, True
-            )
+            callInMainThread(self.downloadButton.setVisible, True)
         else:
             # Try again in a bit more than a day
             hours = 24 + 4 * random()
@@ -744,7 +742,7 @@ def showMessageDialog(
     icon=QMessageBox.Icon.Warning,
     buttons=None,
     defaultButton=None,
-    parent=None
+    parent=None,
 ):
     dialog = QMessageBox(parent)
     dialog.setWindowTitle("Fontra Pak")

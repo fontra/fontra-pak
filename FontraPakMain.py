@@ -355,17 +355,6 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(self.label, 1, 0, 1, 2)
 
-        readOnlyCheckBox = QCheckBox("Open fonts in read-only mode")
-        readOnlyCheckBox.setCheckState(
-            Qt.CheckState.Checked
-            if applicationSettings.value("openFontsInReadOnlyMode", False, type=bool)
-            else Qt.CheckState.Unchecked
-        )
-        readOnlyCheckBox.stateChanged.connect(
-            lambda s: applicationSettings.setValue("openFontsInReadOnlyMode", bool(s))
-        )
-        layout.addWidget(readOnlyCheckBox, 2, 0)
-
         self.sampleTextBox = QPlainTextEdit(
             applicationSettings.value("editorSampleText", ""), self
         )
@@ -381,8 +370,8 @@ class FontraMainWidget(QMainWindow):
                 "editorSampleText", self.sampleTextBox.toPlainText()
             )
         )
-        layout.addWidget(QLabel("Sample text:"), 3, 0)
-        layout.addWidget(self.sampleTextBox, 4, 0, 1, 2)
+        layout.addWidget(QLabel("Sample text:"), 2, 0)
+        layout.addWidget(self.sampleTextBox, 3, 0, 1, 2)
 
         widget = QWidget()
         widget.setLayout(layout)

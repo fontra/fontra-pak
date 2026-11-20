@@ -9,11 +9,11 @@ QFrame#dropArea QLabel {
     font-size: 18px;
 }
 
-QFrame#dropArea QLabel[class~="drop-area-title"] {
+QFrame#dropArea QLabel#dropAreaTitle {
     font-size: 40px;
 }
 
-QFrame#dropArea[class~="dropping"] {
+QFrame#dropArea[dropping="true"] {
     background-color: rgba(255,255,255,64);
     border-color: gray;
 }

@@ -63,8 +63,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ui_utils import addClass, removeClass
-
 fileTypes = [
     # name, extension
     ("Fontra", "fontra"),
@@ -224,6 +222,10 @@ class DropAreaFrame(QFrame):
             self.doubleClicked.emit()
         super().mouseDoubleClickEvent(event)
 
+    def setDropping(self, dropping):
+        self.setProperty("dropping", dropping)
+        refreshStyle(self)
+
 
 class DropAreaText(QLabel):
     def __init__(self, text="", parent=None):
@@ -320,7 +322,7 @@ class FontraMainWidget(QMainWindow):
         dropAreaLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         dropAreaTitle = DropAreaText("Drop font files here")
-        addClass(dropAreaTitle, "drop-area-title")
+        dropAreaTitle.setObjectName("dropAreaTitle")
         dropAreaLayout.addWidget(dropAreaTitle)
 
         dropAreaTexts = [
@@ -332,7 +334,7 @@ class FontraMainWidget(QMainWindow):
         ]
         for dropAreaText in dropAreaTexts:
             dropAreaLayout.addWidget(DropAreaText(dropAreaText))
-    
+
         dropAreaLayout.insertSpacing(1, -5)
         dropAreaLayout.insertSpacing(3, 14)
         dropAreaLayout.insertSpacing(5, 14)
@@ -391,15 +393,15 @@ class FontraMainWidget(QMainWindow):
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
-            addClass(self.dropAreaFrame, "dropping")
+            self.dropAreaFrame.setDropping(True)
         else:
             event.ignore()
 
     def dragLeaveEvent(self, event):
-        removeClass(self.dropAreaFrame, "dropping")
+        self.dropAreaFrame.setDropping(False)
 
     def dropEvent(self, event):
-        removeClass(self.dropAreaFrame, "dropping")
+        self.dropAreaFrame.setDropping(False)
         files = [u.toLocalFile() for u in event.mimeData().urls()]
         for path in files:
             openFile(path, self.port)
@@ -881,6 +883,12 @@ def connectToRunningInstance(paths):
     if socket.state() != QLocalSocket.LocalSocketState.UnconnectedState:
         socket.waitForDisconnected(1000)
     return True
+
+
+def refreshStyle(widget):
+    widget.style().unpolish(widget)
+    widget.style().polish(widget)
+    widget.update()
 
 
 class SingleInstanceServer(QObject):

@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QWidget
 
+
 def refreshStyle(widget):
     widget.style().unpolish(widget)
     widget.style().polish(widget)
@@ -9,6 +10,7 @@ def refreshStyle(widget):
         child.style().unpolish(child)
         child.style().polish(child)
         child.update()
+
 
 def addClass(widget, *class_names: str):
     current = (widget.property("class") or "").split()
@@ -20,6 +22,7 @@ def addClass(widget, *class_names: str):
     if changed:
         widget.setProperty("class", " ".join(current))
         refreshStyle(widget)
+
 
 def removeClass(widget, *class_names: str):
     current = (widget.property("class") or "").split()

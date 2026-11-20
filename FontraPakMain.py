@@ -45,7 +45,6 @@ from PyQt6.QtGui import QAction, QIcon, QKeySequence
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtWidgets import (
     QApplication,
-    QCheckBox,
     QDialog,
     QFileDialog,
     QFileIconProvider,

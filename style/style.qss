@@ -23,3 +23,7 @@ QFrame#dropArea[dropping="true"] {
     background-color: rgba(255,255,255,64);
     border-color: gray;
 }
+
+QMessageBox QTextEdit {
+    font-weight: regular;
+}

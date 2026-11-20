@@ -748,7 +748,6 @@ def showMessageDialog(
     dialog.setText(message)
     dialog.setInformativeText(infoText)
     if detailedText is not None:
-        dialog.setStyleSheet("QTextEdit { font-weight: regular; }")
         dialog.setDetailedText(detailedText)
     if buttons is not None:
         dialog.setStandardButtons(buttons)

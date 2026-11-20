@@ -81,6 +81,7 @@ for module_name in modules_to_collect_all:
 
 
 datas += [("icon/FontraIcon.ico", "icon")]
+datas += [("style/*.qss", "style")]
 
 binaries_to_add = ["sr-aef"]
 for binary_name in binaries_to_add:

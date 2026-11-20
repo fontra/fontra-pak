@@ -321,27 +321,21 @@ class FontraMainWidget(QMainWindow):
 
         dropAreaTitle = DropAreaText("Drop font files here")
         addClass(dropAreaTitle, "drop-area-title")
-        dropAreaSubtitle = DropAreaText("or double-click to browse")
-        dropAreaDisclaimer = DropAreaText(
-            "Your fonts stay on your computer and are never uploaded anywhere."
-        )
-        dropAreaFormats = [
-            "<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk",
-            "<b>Partial read and write:</b> .glyphs, .glyphspackage",
+        dropAreaLayout.addWidget(dropAreaTitle)
+
+        dropAreaTexts = [
+            "or double-click to browse",
+            "Your fonts stay on your computer and are never uploaded anywhere.",
+            "<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk<br>"
+            "<b>Partial read and write:</b> .glyphs, .glyphspackage<br>"
             "<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx",
         ]
-
-        dropAreaLayout.addWidget(dropAreaTitle)
-        dropAreaLayout.addSpacing(-5)
-        dropAreaLayout.addWidget(dropAreaSubtitle)
-        dropAreaLayout.addSpacing(14)
-        dropAreaLayout.addWidget(dropAreaDisclaimer)
-        dropAreaLayout.addSpacing(14)
-        for i, dropAreaFormat in enumerate(dropAreaFormats):
-            formatLabel = DropAreaText(dropAreaFormat)
-            dropAreaLayout.addWidget(formatLabel)
-            if i < len(dropAreaFormats) - 1:
-                dropAreaLayout.addSpacing(-5)
+        for dropAreaText in dropAreaTexts:
+            dropAreaLayout.addWidget(DropAreaText(dropAreaText))
+    
+        dropAreaLayout.insertSpacing(1, -5)
+        dropAreaLayout.insertSpacing(3, 14)
+        dropAreaLayout.insertSpacing(5, 14)
 
         layout.addWidget(self.dropAreaFrame, 1, 0, 1, 2)
 

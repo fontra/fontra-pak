@@ -45,7 +45,6 @@ from PyQt6.QtGui import QAction, QIcon, QKeySequence
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtWidgets import (
     QApplication,
-    QCheckBox,
     QDialog,
     QFileDialog,
     QFileIconProvider,
@@ -273,12 +272,21 @@ class FontraMainWidget(QMainWindow):
         actionOpen = QAction("&Open Font...", self)
         actionOpen.setShortcut(QKeySequence(QKeySequence.StandardKey.Open))
         actionOpen.triggered.connect(self.openFont)
+        actionReadOnlyCheckBox = QAction("Open fonts in read-only mode", self)
+        actionReadOnlyCheckBox.setCheckable(True)
+        if applicationSettings.value("openFontsInReadOnlyMode", False, type=bool):
+            actionReadOnlyCheckBox.setChecked(True)
+        actionReadOnlyCheckBox.toggled.connect(
+            lambda s: applicationSettings.setValue("openFontsInReadOnlyMode", bool(s))
+        )
         actionQuit = QAction("&Quit", self)
         actionQuit.setShortcut(QKeySequence(QKeySequence.StandardKey.Quit))
         actionQuit.triggered.connect(lambda: QApplication.instance().quit())
         fileMenu = menuBar.addMenu("&File")
         fileMenu.addAction(actionNew)
         fileMenu.addAction(actionOpen)
+        fileMenu.addSeparator()
+        fileMenu.addAction(actionReadOnlyCheckBox)
         fileMenu.addSeparator()
         fileMenu.addAction(actionQuit)
 
@@ -346,24 +354,13 @@ class FontraMainWidget(QMainWindow):
 
         layout.addWidget(self.label, 1, 0, 1, 2)
 
-        readOnlyCheckBox = QCheckBox("Open fonts in read-only mode")
-        readOnlyCheckBox.setCheckState(
-            Qt.CheckState.Checked
-            if applicationSettings.value("openFontsInReadOnlyMode", False, type=bool)
-            else Qt.CheckState.Unchecked
-        )
-        readOnlyCheckBox.stateChanged.connect(
-            lambda s: applicationSettings.setValue("openFontsInReadOnlyMode", bool(s))
-        )
-        layout.addWidget(readOnlyCheckBox, 2, 0)
-
         self.sampleTextBox = QPlainTextEdit(
             applicationSettings.value("editorSampleText", ""), self
         )
         self.sampleTextBox.setTabChangesFocus(True)
         self.sampleTextBox.setFixedHeight(50)
         self.sampleTextBox.setPlaceholderText(
-            "Enter some text to launch into the editor view,\n"
+            "Enter some sample text to launch into the editor view,\n"
             + "or leave empty to launch into the font overview"
         )
 
@@ -372,8 +369,7 @@ class FontraMainWidget(QMainWindow):
                 "editorSampleText", self.sampleTextBox.toPlainText()
             )
         )
-        layout.addWidget(QLabel("Sample text:"), 3, 0)
-        layout.addWidget(self.sampleTextBox, 4, 0, 1, 2)
+        layout.addWidget(self.sampleTextBox, 2, 0, 1, 2)
 
         widget = QWidget()
         widget.setLayout(layout)

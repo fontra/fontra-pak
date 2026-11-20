@@ -49,6 +49,7 @@ from PyQt6.QtWidgets import (
     QDialog,
     QFileDialog,
     QFileIconProvider,
+    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -58,9 +59,8 @@ from PyQt6.QtWidgets import (
     QProgressDialog,
     QPushButton,
     QSizePolicy,
-    QWidget,
     QVBoxLayout,
-    QFrame,
+    QWidget,
 )
 
 from ui_utils import addClass, removeClass

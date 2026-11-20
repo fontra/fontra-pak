@@ -7,10 +7,16 @@ QFrame#dropArea {
 
 QFrame#dropArea QLabel {
     font-size: 18px;
+    margin-top: 24px;
 }
 
 QFrame#dropArea QLabel#dropAreaTitle {
     font-size: 40px;
+    margin-top: 0;
+}
+
+QFrame#dropArea QLabel#dropAreaSubtitle {
+    margin-top: 0;
 }
 
 QFrame#dropArea[dropping="true"] {

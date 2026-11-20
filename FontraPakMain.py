@@ -377,7 +377,6 @@ class FontraMainWidget(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-        self.show()
 
     def closeEvent(self, event):
         if self.openProjects:

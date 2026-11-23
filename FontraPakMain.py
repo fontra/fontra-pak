@@ -267,35 +267,25 @@ class FontraMainWidget(QMainWindow):
         self.openProjects = set()
 
         menuBar = self.menuBar()
-        actionNew = QAction("&New Font...", self)
-        actionNew.setShortcut(QKeySequence(QKeySequence.StandardKey.New))
-        actionNew.triggered.connect(self.newFont)
-        actionOpen = QAction("&Open Font...", self)
-        actionOpen.setShortcut(QKeySequence(QKeySequence.StandardKey.Open))
-        actionOpen.triggered.connect(self.openFont)
-        actionQuit = QAction("&Quit", self)
-        actionQuit.setShortcut(QKeySequence(QKeySequence.StandardKey.Quit))
-        actionQuit.triggered.connect(lambda: QApplication.instance().quit())
-        fileMenu = menuBar.addMenu("&File")
-        fileMenu.addAction(actionNew)
-        fileMenu.addAction(actionOpen)
-        fileMenu.addSeparator()
-        fileMenu.addAction(actionQuit)
 
-        actionDocs = QAction("&Documentation", self)
-        actionDocs.triggered.connect(lambda: openURL(docsURL))
-        actionChangelog = QAction("&Changelog", self)
-        actionChangelog.triggered.connect(lambda: openURL(changelogURL))
-        actionLatestDownload = QAction("Download latest Fontra Pak", self)
-        actionLatestDownload.triggered.connect(self.goToLatestDownload)
-        actionAbout = QAction("&About Fontra Pak", self)
-        actionAbout.triggered.connect(self.aboutFontra)
+        fileMenu = menuBar.addMenu("&File")
+        fileMenu.addAction("New Font...", QKeySequence.StandardKey.New, self.newFont)
+        fileMenu.addAction("Open Font...", QKeySequence.StandardKey.Open, self.openFont)
+        fileMenu.addSeparator()
+        fileMenu.addAction(
+            "Quit",
+            QKeySequence.StandardKey.Quit,
+            lambda: QApplication.instance().quit(),
+        )
+
         helpMenu = menuBar.addMenu("&Help")
-        helpMenu.addAction(actionDocs)
-        helpMenu.addAction(actionChangelog)
+        helpMenu.addAction("Documentation", lambda: openURL(docsURL))
+        helpMenu.addAction("Changelog", lambda: openURL(changelogURL))
         helpMenu.addSeparator()
-        helpMenu.addAction(actionLatestDownload)
-        helpMenu.addAction(actionAbout)
+        helpMenu.addAction("Download latest Fontra Pak", self.goToLatestDownload)
+        helpMenu.addAction("About Fontra Pak", self.aboutFontra).setMenuRole(
+            QAction.MenuRole.AboutRole
+        )
 
         self.setWindowTitle("Fontra Pak")
         self.resize(720, 480)

@@ -8,6 +8,7 @@ QFrame#dropArea {
 QFrame#dropArea QLabel {
     font-size: 18px;
     margin-top: 18px;
+    qproperty-alignment: AlignCenter;
 }
 
 QFrame#dropArea QLabel#dropAreaTitle {

@@ -324,9 +324,6 @@ class FontraMainWidget(QMainWindow):
         for text, name in zip(dropAreaTexts, dropAreaTextsObjectNames):
             dropAreaText = QLabel(text)
             dropAreaText.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            dropAreaText.setSizePolicy(
-                QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred
-            )
             dropAreaText.setObjectName(name)
             dropAreaLayout.addWidget(dropAreaText)
 

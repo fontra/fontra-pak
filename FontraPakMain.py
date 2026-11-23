@@ -310,7 +310,6 @@ class FontraMainWidget(QMainWindow):
         )
         dropAreaLayout = QVBoxLayout(self.dropAreaFrame)
         dropAreaLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        dropAreaLayout.setSpacing(0)
         dropAreaTexts = [
             ("Drop font files here", "dropAreaTitle"),
             ("or double-click to browse", "dropAreaSubtitle"),

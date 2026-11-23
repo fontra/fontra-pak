@@ -274,8 +274,7 @@ class FontraMainWidget(QMainWindow):
 
         self.setAcceptDrops(True)
 
-        # Helpful: https://www.pythontutorial.net/pyqt/pyqt-qgridlayout/
-        layout = QGridLayout()
+        layout = QVBoxLayout()
 
         buttonNew = QPushButton("&New Font...", self)
         buttonNew.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
@@ -288,8 +287,7 @@ class FontraMainWidget(QMainWindow):
         buttonsLayout = QHBoxLayout()
         buttonsLayout.addWidget(buttonNew)
         buttonsLayout.addWidget(buttonOpen)
-
-        layout.addLayout(buttonsLayout, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        buttonsLayout.addStretch()
 
         if sys.platform in {"darwin", "win32", "linux"} and not runningAsFlatpak():
             self.downloadButton = QPushButton("‼️ A new version is available ‼️", self)
@@ -298,18 +296,15 @@ class FontraMainWidget(QMainWindow):
             )
             self.downloadButton.clicked.connect(self.goToLatestDownload)
             self.downloadButton.setVisible(False)
-            layout.addWidget(
-                self.downloadButton, 0, 1, alignment=Qt.AlignmentFlag.AlignRight
-            )
+            buttonsLayout.addWidget(self.downloadButton)
             if "test-startup" not in sys.argv:
                 self.checkForUpdate(1500)
+
+        layout.addLayout(buttonsLayout)
 
         self.dropAreaFrame = DropAreaFrame()
         self.dropAreaFrame.doubleClicked.connect(self.openFont)
         self.dropAreaFrame.setObjectName("dropArea")
-        self.dropAreaFrame.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
-        )
         dropAreaLayout = QVBoxLayout(self.dropAreaFrame)
         dropAreaLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         dropAreaTexts = [
@@ -326,7 +321,7 @@ class FontraMainWidget(QMainWindow):
             dropAreaText.setObjectName(name)
             dropAreaLayout.addWidget(dropAreaText)
 
-        layout.addWidget(self.dropAreaFrame, 1, 0, 1, 2)
+        layout.addWidget(self.dropAreaFrame, 1)
 
         readOnlyCheckBox = QCheckBox("Open fonts in read-only mode")
         readOnlyCheckBox.setCheckState(
@@ -337,7 +332,7 @@ class FontraMainWidget(QMainWindow):
         readOnlyCheckBox.stateChanged.connect(
             lambda s: applicationSettings.setValue("openFontsInReadOnlyMode", bool(s))
         )
-        layout.addWidget(readOnlyCheckBox, 2, 0)
+        layout.addWidget(readOnlyCheckBox)
 
         self.sampleTextBox = QPlainTextEdit(
             applicationSettings.value("editorSampleText", ""), self
@@ -354,8 +349,8 @@ class FontraMainWidget(QMainWindow):
                 "editorSampleText", self.sampleTextBox.toPlainText()
             )
         )
-        layout.addWidget(QLabel("Sample text:"), 3, 0)
-        layout.addWidget(self.sampleTextBox, 4, 0, 1, 2)
+        layout.addWidget(QLabel("Sample text:"))
+        layout.addWidget(self.sampleTextBox)
 
         widget = QWidget()
         widget.setLayout(layout)

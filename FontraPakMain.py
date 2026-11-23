@@ -50,7 +50,6 @@ from PyQt6.QtWidgets import (
     QFileDialog,
     QFileIconProvider,
     QFrame,
-    QGridLayout,
     QHBoxLayout,
     QLabel,
     QMainWindow,

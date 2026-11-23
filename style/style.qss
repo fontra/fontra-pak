@@ -1,26 +1,26 @@
-QFrame#dropArea {
+DropAreaFrame {
     border-radius: 20px;
     border: 5px dashed lightgray;
     padding: 16px;
     background-color: rgba(255,255,255,128);
 }
 
-QFrame#dropArea QLabel {
+DropAreaFrame QLabel {
     font-size: 18px;
     margin-top: 18px;
     qproperty-alignment: AlignCenter;
 }
 
-QFrame#dropArea QLabel#dropAreaTitle {
+DropAreaFrame QLabel#dropAreaTitle {
     font-size: 40px;
     margin-top: 0;
 }
 
-QFrame#dropArea QLabel#dropAreaSubtitle {
+DropAreaFrame QLabel#dropAreaSubtitle {
     margin-top: -6px;
 }
 
-QFrame#dropArea[dropping="true"] {
+DropAreaFrame[dropping="true"] {
     background-color: rgba(255,255,255,64);
     border-color: gray;
 }

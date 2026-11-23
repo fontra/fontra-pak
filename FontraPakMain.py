@@ -303,7 +303,6 @@ class FontraMainWidget(QMainWindow):
 
         self.dropAreaFrame = DropAreaFrame()
         self.dropAreaFrame.doubleClicked.connect(self.openFont)
-        self.dropAreaFrame.setObjectName("dropArea")
         dropAreaLayout = QVBoxLayout(self.dropAreaFrame)
         dropAreaLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         dropAreaTexts = [

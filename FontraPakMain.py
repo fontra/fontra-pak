@@ -313,7 +313,7 @@ class FontraMainWidget(QMainWindow):
         dropAreaTexts = [
             ("Drop font files here", "dropAreaTitle"),
             ("or double-click to browse", "dropAreaSubtitle"),
-            "Your fonts stay on your computer and are never uploaded anywhere.",
+            "Your fonts stay on your computer\nand are never uploaded anywhere.",
             "<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk<br>"
             "<b>Partial read and write:</b> .glyphs, .glyphspackage<br>"
             "<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx",
@@ -326,7 +326,6 @@ class FontraMainWidget(QMainWindow):
                 QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred
             )
             dropAreaText.setObjectName(name)
-            dropAreaText.setWordWrap(True)
             dropAreaLayout.addWidget(dropAreaText)
 
         layout.addWidget(self.dropAreaFrame, 1, 0, 1, 2)

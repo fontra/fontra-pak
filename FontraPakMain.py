@@ -276,7 +276,7 @@ class FontraMainWidget(QMainWindow):
             "Quit",
             QKeySequence.StandardKey.Quit,
             lambda: QApplication.instance().quit(),
-        )
+        ).setMenuRole(QAction.MenuRole.QuitRole)
 
         helpMenu = menuBar.addMenu("&Help")
         helpMenu.addAction("Documentation", lambda: openURL(docsURL))

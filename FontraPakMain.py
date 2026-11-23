@@ -227,16 +227,6 @@ class DropAreaFrame(QFrame):
         refreshStyle(self)
 
 
-class DropAreaText(QLabel):
-    def __init__(self, text="", parent=None):
-        super().__init__(text, parent)
-        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setSizePolicy(
-            QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred
-        )
-        self.setWordWrap(True)
-
-
 class FontraMainWidget(QMainWindow):
     def __init__(self, port):
         super().__init__()
@@ -321,23 +311,24 @@ class FontraMainWidget(QMainWindow):
         dropAreaLayout = QVBoxLayout(self.dropAreaFrame)
         dropAreaLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         dropAreaLayout.setSpacing(0)
-
-        dropAreaTitle = DropAreaText("Drop font files here")
-        dropAreaTitle.setObjectName("dropAreaTitle")
-        dropAreaLayout.addWidget(dropAreaTitle)
-
-        dropAreaSubtitle = DropAreaText("or double-click to browse")
-        dropAreaSubtitle.setObjectName("dropAreaSubtitle")
-        dropAreaLayout.addWidget(dropAreaSubtitle)
-
         dropAreaTexts = [
+            ("Drop font files here", "dropAreaTitle"),
+            ("or double-click to browse", "dropAreaSubtitle"),
             "Your fonts stay on your computer and are never uploaded anywhere.",
             "<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk<br>"
             "<b>Partial read and write:</b> .glyphs, .glyphspackage<br>"
             "<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx",
         ]
-        for dropAreaText in dropAreaTexts:
-            dropAreaLayout.addWidget(DropAreaText(dropAreaText))
+        for item in dropAreaTexts:
+            text, name = item if isinstance(item, tuple) else (item, None)
+            dropAreaText = QLabel(text)
+            dropAreaText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            dropAreaText.setSizePolicy(
+                QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred
+            )
+            dropAreaText.setObjectName(name)
+            dropAreaText.setWordWrap(True)
+            dropAreaLayout.addWidget(dropAreaText)
 
         layout.addWidget(self.dropAreaFrame, 1, 0, 1, 2)
 

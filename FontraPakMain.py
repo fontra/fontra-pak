@@ -224,7 +224,9 @@ class DropAreaFrame(QFrame):
 
     def setDropping(self, dropping):
         self.setProperty("dropping", dropping)
-        refreshStyle(self)
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
 
 
 class FontraMainWidget(QMainWindow):
@@ -871,12 +873,6 @@ def connectToRunningInstance(paths):
     if socket.state() != QLocalSocket.LocalSocketState.UnconnectedState:
         socket.waitForDisconnected(1000)
     return True
-
-
-def refreshStyle(widget):
-    widget.style().unpolish(widget)
-    widget.style().polish(widget)
-    widget.update()
 
 
 class SingleInstanceServer(QObject):

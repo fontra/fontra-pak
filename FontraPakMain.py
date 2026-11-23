@@ -311,15 +311,15 @@ class FontraMainWidget(QMainWindow):
         dropAreaLayout = QVBoxLayout(self.dropAreaFrame)
         dropAreaLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         dropAreaTexts = [
-            ("Drop font files here", "dropAreaTitle"),
-            ("or double-click to browse", "dropAreaSubtitle"),
+            "Drop font files here",
+            "or double-click to browse",
             "Your fonts stay on your computer\nand are never uploaded anywhere.",
             "<b>Read and write:</b> .ufo, .designspace, .fontra, .rcjk<br>"
             "<b>Partial read and write:</b> .glyphs, .glyphspackage<br>"
             "<b>Read only:</b> .ttf, .otf, .woff, .woff2, .ttx",
         ]
-        for item in dropAreaTexts:
-            text, name = item if isinstance(item, tuple) else (item, None)
+        dropAreaTextsObjectNames = ["dropAreaTitle", "dropAreaSubtitle", None, None]
+        for text, name in zip(dropAreaTexts, dropAreaTextsObjectNames):
             dropAreaText = QLabel(text)
             dropAreaText.setAlignment(Qt.AlignmentFlag.AlignCenter)
             dropAreaText.setSizePolicy(

@@ -459,7 +459,7 @@ class FontraMainWidget(QMainWindow):
         for path in recentFiles:
             self.recentMenu.addAction(
                 pathlib.Path(path).name,
-                lambda checked=False, path=path: openFile(path, self.port)
+                lambda checked=False, path=path: openFile(path, self.port),
             ).setToolTip(path)
 
         self.recentMenu.addSeparator()

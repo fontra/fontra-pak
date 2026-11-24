@@ -462,6 +462,13 @@ class FontraMainWidget(QMainWindow):
                 lambda checked=False, path=path: openFile(path, self.port)
             ).setToolTip(path)
 
+        self.recentMenu.addSeparator()
+        self.recentMenu.addAction("Clear recent files", self.clearRecentFiles)
+
+    def clearRecentFiles(self):
+        applicationSettings.remove("recentFiles")
+        self.updateRecentFilesMenu()
+
     def preferences(self):
         if self.preferencesWindow is None or not self.preferencesWindow.isVisible():
             self.preferencesWindow = PreferencesWindow()

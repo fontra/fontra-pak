@@ -386,17 +386,7 @@ class FontraMainWidget(QMainWindow):
         self.dropAreaFrame.setDropping(False)
 
         files = [u.toLocalFile() for u in event.mimeData().urls()]
-        fontPaths = [path for path in files if isFontPath(path)]
-        notFonts = [
-            f"“{pathlib.Path(path).name}”" for path in files if not isFontPath(path)
-        ]
-
-        if notFonts:
-            showMessageDialog(
-                "Cannot open " + ", ".join(notFonts),
-                "Not a font, or not a supported font format",
-                parent=self,
-            )
+        fontPaths = self._filterFontPaths(files)
 
         for path in fontPaths:
             openFile(path, self.port)
@@ -442,21 +432,24 @@ class FontraMainWidget(QMainWindow):
         dialog = OpenFontDialog(self, self.activeFolder)
         paths = dialog.fontPaths if dialog.exec() else []
 
-        fontPaths = [pathlib.Path(p) for p in paths if isFontPath(p)]
-        notFonts = [f"“{pathlib.Path(p).name}”" for p in paths if not isFontPath(p)]
-
-        if notFonts:
-            showMessageDialog(
-                "Cannot open " + ", ".join(notFonts),
-                "Not a font, or not a supported font format",
-                parent=self,
-            )
+        fontPaths = self._filterFontPaths(paths)
 
         if fontPaths:
             applicationSettings.setValue("activeFolder", str(fontPaths[0].parent))
 
         for fontPath in fontPaths:
             openFile(fontPath, self.port)
+
+    def _filterFontPaths(self, paths):
+        fontPaths = [pathlib.Path(p) for p in paths if isFontPath(p)]
+        notFonts = [f"“{pathlib.Path(p).name}”" for p in paths if not isFontPath(p)]
+        if notFonts:
+            showMessageDialog(
+                "Cannot open " + ", ".join(notFonts),
+                "Not a font, or not a supported font format",
+                parent=self,
+            )
+        return fontPaths
 
     def preferences(self):
         if self.preferencesWindow is None or not self.preferencesWindow.isVisible():

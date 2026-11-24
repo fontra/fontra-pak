@@ -58,6 +58,7 @@ from PyQt6.QtWidgets import (
     QProgressDialog,
     QPushButton,
     QSizePolicy,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -265,12 +266,23 @@ class FontraMainWidget(QMainWindow):
         super().__init__()
         self.port = port
         self.openProjects = set()
+        self.preferencesWindow = None
 
         menuBar = self.menuBar()
 
         fileMenu = menuBar.addMenu("&File")
         fileMenu.addAction("New Font...", QKeySequence.StandardKey.New, self.newFont)
         fileMenu.addAction("Open Font...", QKeySequence.StandardKey.Open, self.openFont)
+        fileMenu.addSeparator()
+        fileMenu.addAction(
+            "Close",
+            QKeySequence.StandardKey.Close,
+            lambda: QApplication.focusWindow().close(),
+        )
+        fileMenu.addSeparator()
+        fileMenu.addAction(
+            "Preferences...", QKeySequence.StandardKey.Preferences, self.preferences
+        ).setMenuRole(QAction.MenuRole.PreferencesRole)
         fileMenu.addSeparator()
         fileMenu.addAction(
             "Quit",
@@ -288,7 +300,6 @@ class FontraMainWidget(QMainWindow):
         )
 
         self.setWindowTitle("Fontra Pak")
-        self.resize(720, 480)
 
         self.resize(applicationSettings.value("size", QSize(720, 480)))
         self.move(applicationSettings.value("pos", QPoint(50, 50)))
@@ -386,6 +397,8 @@ class FontraMainWidget(QMainWindow):
         applicationSettings.setValue("size", self.size())
         applicationSettings.setValue("pos", self.pos())
 
+        QApplication.closeAllWindows()
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
@@ -458,6 +471,16 @@ class FontraMainWidget(QMainWindow):
 
         for fontPath in fontPaths:
             openFile(fontPath, self.port)
+
+    def preferences(self):
+        if self.preferencesWindow is None or not self.preferencesWindow.isVisible():
+            self.preferencesWindow = PreferencesWindow()
+        self.preferencesWindow.show()
+        self.preferencesWindow.activateWindow()
+        self.preferencesWindow.raise_()
+
+    def quit(self):
+        QApplication.instance().quit()
 
     def messageFromServer(self, item):
         action, arguments = item
@@ -606,6 +629,57 @@ class FontraMainWidget(QMainWindow):
             defaultButton=QMessageBox.StandardButton.Ok,
             parent=self,
         )
+
+
+class PreferencesWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Fontra Pak Preferences")
+        self.setMinimumWidth(450)
+        self.setMinimumHeight(100)
+        self.setMaximumHeight(100)
+
+        pluginsLabel = QLabel("Plugins folder:")
+
+        buttonAskFolder = QPushButton("&Choose...", self)
+        buttonAskFolder.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+        )
+        buttonAskFolder.clicked.connect(self.askFolder)
+
+        self.pluginsDirectoryLabel = QLabel(
+            applicationSettings.value("plugins-dir", "")
+        )
+        self.pluginsDirectoryLabel.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+
+        pathLayout = QHBoxLayout()
+        pathLayout.addWidget(buttonAskFolder)
+        pathLayout.addWidget(self.pluginsDirectoryLabel)
+
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(pluginsLabel)
+        layout.addLayout(pathLayout)
+        layout.addStretch()
+
+        self.setLayout(layout)
+
+        self.resize(applicationSettings.value("prefs-size", QSize(600, 150)))
+        self.move(applicationSettings.value("prefs-pos", QPoint(150, 150)))
+
+    def askFolder(self):
+        previousPath = applicationSettings.value("plugins-dir", "")
+        result = QFileDialog.getExistingDirectory(directory=previousPath)
+        if result:
+            applicationSettings.setValue("plugins-dir", result)
+            self.pluginsDirectoryLabel.setText(result)
+
+    def closeEvent(self, event):
+        applicationSettings.setValue("prefs-size", self.size())
+        applicationSettings.setValue("prefs-pos", self.pos())
 
 
 def fetchLatestReleaseInfo() -> tuple[str, str | None]:
@@ -779,7 +853,7 @@ class ProjectOpenListener:
         self.appQueue.put(("projectClosed", (projectIdentifier,)))
 
 
-def runFontraServer(host, port, queue):
+def runFontraServer(host, port, pluginsDirectory, queue):
     logging.basicConfig(
         format="%(asctime)s %(name)-17s %(levelname)-8s %(message)s",
         level=logging.INFO,
@@ -797,6 +871,9 @@ def runFontraServer(host, port, queue):
         httpPort=port,
         projectManager=projectManager,
         versionToken=secrets.token_hex(4),
+        pluginsDirectory=(
+            pathlib.Path(pluginsDirectory) if pluginsDirectory is not None else None
+        ),
     )
     server.setup()
     server.run(showLaunchBanner=False)
@@ -927,7 +1004,13 @@ def main():
     host = "localhost"
     port = findFreeTCPPort(host=host)
     serverProcess = multiprocessing.Process(
-        target=runFontraServer, args=(host, port, queue)
+        target=runFontraServer,
+        args=(
+            host,
+            port,
+            applicationSettings.value("plugins-dir") or None,
+            queue,
+        ),
     )
     serverProcess.start()
 

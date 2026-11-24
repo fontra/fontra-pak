@@ -387,9 +387,13 @@ class FontraMainWidget(QMainWindow):
 
     def dropEvent(self, event):
         self.dropAreaFrame.setDropping(False)
+
         files = [u.toLocalFile() for u in event.mimeData().urls()]
-        for path in files:
+        fontPaths = self._filterFontPaths(files)
+
+        for path in fontPaths:
             openFile(path, self.port)
+
         event.acceptProposedAction()
 
     @property
@@ -431,21 +435,24 @@ class FontraMainWidget(QMainWindow):
         dialog = OpenFontDialog(self, self.activeFolder)
         paths = dialog.fontPaths if dialog.exec() else []
 
-        fontPaths = [pathlib.Path(p) for p in paths if isFontPath(p)]
-        notFonts = [f"“{pathlib.Path(p).name}”" for p in paths if not isFontPath(p)]
-
-        if notFonts:
-            showMessageDialog(
-                "Cannot open " + ", ".join(notFonts),
-                "Not a font, or not a supported font format",
-                parent=self,
-            )
+        fontPaths = self._filterFontPaths(paths)
 
         if fontPaths:
             applicationSettings.setValue("activeFolder", str(fontPaths[0].parent))
 
         for fontPath in fontPaths:
             openFile(fontPath, self.port)
+
+    def _filterFontPaths(self, paths):
+        fontPaths = [pathlib.Path(p) for p in paths if isFontPath(p)]
+        notFonts = [f"“{pathlib.Path(p).name}”" for p in paths if not isFontPath(p)]
+        if notFonts:
+            showMessageDialog(
+                "Cannot open " + ", ".join(notFonts),
+                "Not a font, or not a supported font format",
+                parent=self,
+            )
+        return fontPaths
 
     def updateRecentFilesMenu(self):
         self.recentMenu.clear()

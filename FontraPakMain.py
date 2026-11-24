@@ -240,6 +240,9 @@ class FontraMainWidget(QMainWindow):
         fileMenu = menuBar.addMenu("&File")
         fileMenu.addAction("New Font...", QKeySequence.StandardKey.New, self.newFont)
         fileMenu.addAction("Open Font...", QKeySequence.StandardKey.Open, self.openFont)
+        self.recentMenu = fileMenu.addMenu("Open Recent")
+        self.recentMenu.setToolTipsVisible(True)
+        self.recentMenu.aboutToShow.connect(self.updateRecentFilesMenu)
         fileMenu.addSeparator()
         fileMenu.addAction(
             "Close",
@@ -450,6 +453,28 @@ class FontraMainWidget(QMainWindow):
                 parent=self,
             )
         return fontPaths
+
+    def updateRecentFilesMenu(self):
+        self.recentMenu.clear()
+        recentFiles = applicationSettings.value("recentFiles", [], type=list)
+        recentFiles = [path for path in recentFiles if isFontPath(path)]
+
+        if not recentFiles:
+            self.recentMenu.addAction("No recent files").setEnabled(False)
+            return
+
+        for path in recentFiles:
+            self.recentMenu.addAction(
+                pathlib.Path(path).name,
+                lambda checked=False, path=path: openFile(path, self.port),
+            ).setToolTip(path)
+
+        self.recentMenu.addSeparator()
+        self.recentMenu.addAction("Clear recent files", self.clearRecentFiles)
+
+    def clearRecentFiles(self):
+        applicationSettings.remove("recentFiles")
+        self.updateRecentFilesMenu()
 
     def preferences(self):
         if self.preferencesWindow is None or not self.preferencesWindow.isVisible():
@@ -764,6 +789,11 @@ async def exportFontToPathAsync(sourcePath, destPath, fileExtension):
 
 def openFile(path, port):
     path = pathlib.Path(path).resolve()
+
+    recentFiles = applicationSettings.value("recentFiles", [], type=list)
+    recentFiles = [p for p in recentFiles if p != str(path)]
+    applicationSettings.setValue("recentFiles", [str(path), *recentFiles][:10])
+
     assert path.is_absolute()
     parts = list(path.parts)
     if not path.drive:

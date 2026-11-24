@@ -384,9 +384,21 @@ class FontraMainWidget(QMainWindow):
 
     def dropEvent(self, event):
         self.dropAreaFrame.setDropping(False)
+
         files = [u.toLocalFile() for u in event.mimeData().urls()]
-        for path in files:
+        fontPaths = [path for path in files if isFontPath(path)]
+        notFonts = [f"“{pathlib.Path(path).name}”" for path in files if not isFontPath(path)]
+
+        if notFonts:
+            showMessageDialog(
+                "Cannot open " + ", ".join(notFonts),
+                "Not a font, or not a supported font format",
+                parent=self,
+            )
+
+        for path in fontPaths:
             openFile(path, self.port)
+
         event.acceptProposedAction()
 
     @property

@@ -35,40 +35,61 @@
                 KeyPath="yes" />
 
           <!-- File associations.
-               .designspace and .glyphs: Fontra Pak becomes the default handler
-               (the Extension elements write HKCR\.ext = ProgId).
-               .ttf/.otf/.woff/.woff2/.ttx: Fontra Pak is only added to
-               "Open with" (OpenWithProgids) and no default is touched. -->
-          <ProgId Id="FontraPak.FontFile"
-                  Description="Font file (Fontra Pak)"
+               .designspace and .glyphs: Fontra Pak becomes the default handler.
+               Each type has its own ProgId so Explorer shows a distinct type name.
+               Font formats (.ttf .otf .woff .woff2 .ttx): Fontra Pak is only offered
+               in "Open with", through the Applications key and OpenWithList. This
+               never writes the (Default) value of those extensions, so it cannot
+               change their default handler or their type name in Explorer. -->
+          <ProgId Id="FontraPak.Designspace"
+                  Description="Designspace File"
                   Icon="FontraPakExe"
                   IconIndex="0">
             <Extension Id="designspace">
               <Verb Id="open" Command="Open" TargetFile="FontraPakExe" Argument='"%1"' />
             </Extension>
-            <!-- The open verb is registered once under the ProgId; a second Verb
-                 with the same id would duplicate its registry rows (WIX0091). -->
-            <Extension Id="glyphs" />
+          </ProgId>
+          <ProgId Id="FontraPak.Glyphs"
+                  Description="Glyphs File"
+                  Icon="FontraPakExe"
+                  IconIndex="0">
+            <Extension Id="glyphs">
+              <Verb Id="open" Command="Open" TargetFile="FontraPakExe" Argument='"%1"' />
+            </Extension>
           </ProgId>
 
-          <!-- Also list Fontra Pak under "Open with" for the two default types,
-               so it stays available if the user later picks another default. -->
+          <!-- Keep Fontra Pak in "Open with" for its own types if the user later
+               picks another default. -->
           <RegistryValue Root="HKCR" Key=".designspace\OpenWithProgids"
-                         Name="FontraPak.FontFile" Type="string" Value="" />
+                         Name="FontraPak.Designspace" Type="string" Value="" />
           <RegistryValue Root="HKCR" Key=".glyphs\OpenWithProgids"
-                         Name="FontraPak.FontFile" Type="string" Value="" />
+                         Name="FontraPak.Glyphs" Type="string" Value="" />
 
-          <!-- "Open with" only (no default change) for common font formats. -->
-          <RegistryValue Root="HKCR" Key=".ttf\OpenWithProgids"
-                         Name="FontraPak.FontFile" Type="string" Value="" />
-          <RegistryValue Root="HKCR" Key=".otf\OpenWithProgids"
-                         Name="FontraPak.FontFile" Type="string" Value="" />
-          <RegistryValue Root="HKCR" Key=".woff\OpenWithProgids"
-                         Name="FontraPak.FontFile" Type="string" Value="" />
-          <RegistryValue Root="HKCR" Key=".woff2\OpenWithProgids"
-                         Name="FontraPak.FontFile" Type="string" Value="" />
-          <RegistryValue Root="HKCR" Key=".ttx\OpenWithProgids"
-                         Name="FontraPak.FontFile" Type="string" Value="" />
+          <!-- "Open with" only (no default, no type name change) for font formats. -->
+          <RegistryValue Root="HKCR" Key="Applications\Fontra Pak.exe"
+                         Name="FriendlyAppName" Type="string" Value="Fontra Pak" />
+          <RegistryValue Root="HKCR" Key="Applications\Fontra Pak.exe\shell\open\command"
+                         Type="string" Value='"[#FontraPakExe]" "%1"' />
+          <RegistryValue Root="HKCR" Key="Applications\Fontra Pak.exe\SupportedTypes"
+                         Name=".ttf" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key="Applications\Fontra Pak.exe\SupportedTypes"
+                         Name=".otf" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key="Applications\Fontra Pak.exe\SupportedTypes"
+                         Name=".woff" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key="Applications\Fontra Pak.exe\SupportedTypes"
+                         Name=".woff2" Type="string" Value="" />
+          <RegistryValue Root="HKCR" Key="Applications\Fontra Pak.exe\SupportedTypes"
+                         Name=".ttx" Type="string" Value="" />
+          <RegistryKey Root="HKCR" Key=".ttf\OpenWithList\Fontra Pak.exe"
+                       ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" />
+          <RegistryKey Root="HKCR" Key=".otf\OpenWithList\Fontra Pak.exe"
+                       ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" />
+          <RegistryKey Root="HKCR" Key=".woff\OpenWithList\Fontra Pak.exe"
+                       ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" />
+          <RegistryKey Root="HKCR" Key=".woff2\OpenWithList\Fontra Pak.exe"
+                       ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" />
+          <RegistryKey Root="HKCR" Key=".ttx\OpenWithList\Fontra Pak.exe"
+                       ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" />
         </Component>
       </Directory>
     </StandardDirectory>

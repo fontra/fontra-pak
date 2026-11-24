@@ -387,7 +387,9 @@ class FontraMainWidget(QMainWindow):
 
         files = [u.toLocalFile() for u in event.mimeData().urls()]
         fontPaths = [path for path in files if isFontPath(path)]
-        notFonts = [f"“{pathlib.Path(path).name}”" for path in files if not isFontPath(path)]
+        notFonts = [
+            f"“{pathlib.Path(path).name}”" for path in files if not isFontPath(path)
+        ]
 
         if notFonts:
             showMessageDialog(

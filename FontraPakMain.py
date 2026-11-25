@@ -279,6 +279,7 @@ class FontraMainWidget(QMainWindow):
         layout = QVBoxLayout()
 
         buttonNew = QPushButton("&New Font...", self)
+        buttonNew.setDefault(True)
         buttonNew.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         buttonNew.clicked.connect(self.newFont)
 
